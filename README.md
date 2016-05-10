@@ -17,6 +17,7 @@ pip --upgrade pip<br>
 C) install packages<br>
 you may need to prefix with sudo (for which you need admin priviledges to run)<br>
 
+you can remove the 2.7 if you are working directly with python2.7:<br>
 pip2.7 install boxsdk pytesseract Pillow oauth2client httplib2 flask numpy scipy scikit-learn scikit-image python-jose matplotlib<br>
 pip2.7 install -U numpy scipy scikit-learn<br>
 sudo yum install libffi-devel<br>
@@ -85,7 +86,16 @@ sedgwick_map.json:
 }
 </pre></tt>
 
-You'll use this filename as an argument below<br>
+Next, create your app.cfg file:
+<tt><pre>
+6y3m...ACCESS...TOKEN...FROM...BOX
+2yca...SECRET...TOKEN...FROM...BOX
+https://localhost
+</pre></tt>
+
+upload_files.py expects this file to be in your local directory when you run it or a calling program (jpeg_processor.py).
+
+You'll use these files as argument to the program jpeg_processor.py<br>
 
 The following program <br>
 	- recursively scans a directory and all of its subdirectories<br>
@@ -98,6 +108,181 @@ if your python version (python -V) is 2.7 then you can just use python here:<br>
 
 meta.csv will be created and will hold details on each file that is processed<br>
 meta.out will be created and will hold timings of different operations performed by the program<br>
+
+## Background and Box setup
+
+jpeg_processor.py uses the following other python programs:
+
+A) upload_files.py - uploads the files to box <br>
+	//you can run this program by itself (there is a main routine), separate<br>
+	//from jpeg_processor.py to learn and test it:<br>
+
+<pre>
+python upload_files.py -h
+
+	//before you run this, you must set up box first (see (i) below)
+	//Also you must create a directory folder in box, go into ucsb.box.com 
+	//using your browser, create a new fold, open it, note the folder ID 
+	//in the URL (directory name just prior to the folder name and /)
+	//EX: https://ucsb.app.box.com/files/0/f/5757220117/INT_94RY  has an ID of 5757220117
+	//replace 5802215677 below with your folder ID
+
+	python upload_files.py 5802215677 testdir
+	//testdir is a local directory that should hold JPG files and/or directories.  
+	//The program walks testdir and uploads the files to box
+
+	//successful output looks like this 
+	//(depending on what you have in testdir, I have directories
+	//and JPG files in different directories.  See how the directories are 
+	//recursively searched:
+
+	uploading to folder: test
+	dir: testdir/
+	processing file: test_1_chandra.JPG
+	processing file: test_1.JPG
+	processing file: test2_foo_1_bar.JPG
+	processing file: test2_foo_1_boo.JPG
+	processing file: test2_foo_1_foo.JPG
+	
+
+	//if you get an error, make sure you have completed the steps below
+	//next, check the error message to see if you did something wrong
+	//edit upload_files.py and set DEBUG to True and rerun to get more info
+	//make sure and set DEBUG to False before running this on lots of files/production
+	//as it is very verbose!
+	//next, contact Chandra (ckrintz@cs.ucsb.edu) about it
+
+</pre>
+
+(i) setting up box so that you can upload to your own account:<br/>
+//you only need to do this once; you also can make multiple apps (1 per each machine<br/>
+//you want to run from)<br/>
+in browser, goto: https://ucsb.app.box.com/developers/services<br/>
+<pre>
+	Select Create a Box Application on the right
+	Name it (e.g. box_are1) and select create
+	Scroll down and copy/paste (save off) the
+		client_id 
+		and
+		client_secret
+	Put this in the redirect_uri box:
+		https://localhost
+	Under scope, select
+		Read and write all files and folders stored in Box 
+</pre>
+
+    (ii) Now go back to your machine and in the directory in which upload_files.py is in,<br>
+	create a file called app.cfg and add 3 lines to it replace client_id and client_secret<br>
+	with the values you downloaded and saved off in (i) above:<br>
+		client_id<br>
+		client_secret<br>
+		https://localhost<br>
+
+	The program upload_files.py reads this file in auth() to authorize use of<br>
+	your box account by the program.<br>
+	Save off this file so that you remember which box app it belongs to<br>
+	<tt>cp app.cfg boxare1.cfg</tt><br>
+	You will need to update app.cfg when/if you change apps or client id/secrets<br>
+
+     (iii) upload_files.py also expects/uses a tokens files in the local directory called<br>
+	tokens.json  (saved in global var TOKENS).  The program looks here to see<br>
+	if there are old tokens it can use.  You can delete this file the first time<br>
+	you run the program or to generate new tokens.  If you run the program<br>
+	and you get the following error:<br>
+<pre>
+		boxsdk.exception.BoxOAuthException: 
+		Message: {"error":"invalid_grant","error_description":"Invalid refresh token"}
+		Status: 400
+		URL: https://api.box.com/oauth2/token
+		Method: POST
+</pre>
+<p>
+	It means that your tokens have expired or are invalid and you need to create new ones.
+	In this case, delete tokens.json and rerun.  This will step you through
+	the authorization process which requires manual intervention.  You will
+	only need to do this once if you only use this app and these tokens from the 
+	same machine.  If you move machines and run this elsewhere, you will need to 
+	copy over the tokens.json file back and forth.  There can only be one tokens.json
+	file in use for a box app at a time.
+</p>
+
+<p>
+	When you run upload_files.py without a tokens.json file it will give you a URL
+	to navigate to in your browser (manual step): cut/paste this URL and go there
+	with your browser.  It will ask you to Grant Access to Box (do so).
+	It will then give you a page that says "Unable to Connect".  While on this page,
+	cut/paste these two values from the URL in of the page:
+</p>
+<pre>
+		code=...
+		state=box_csrf_token_App...
+</pre>
+
+	These are arguments (the payload) of the URL.  The URL has a route<br>
+		https://localhost/<br>
+		Then there is a ? (used as a delimiter)<br>
+		Followed by key-value pairs separated by & (another delimiter)<br>
+	E.g: https://localhost/?state=box_csrf_token_yH1sKQq5sL75BEt2&code=q2cmsBoEmie4f5YN6HF6ZcEGuGSAlwtD<br>
+		keys here are state and code<br>
+		The = sign is a delimiter between the key and value<br>
+		So here the value for state is: box_csrf_token_yH1sKQq5sL75BEt2<br>
+		And the value for code is: q2cmsBoEmie4f5YN6HF6ZcEGuGSAlwtD<br>
+
+<p>
+	The state and code change each time you run the program (oauth handshake) to 
+	generate the tokens.  When you do this, the first question asks you for the code
+	and the second asks you for the csrf token (state).  Cut and paste these and 
+	the program uses them to get the access and refresh tokens from box for all
+	future uses.  It stores them in tokens.json so that you don't need to go through
+	this step each time.  You can though, by just deleting tokens.json and going through
+	all of the above step again. It doesn't hurt to do this repeatedly.  You can also
+	press ctrl-C to quit and restart.
+</p>
+	
+<pre>
+		Type in the code that appears after             "code="
+		in the URL box in your browser window, 
+		and press enter: q2cmsBoEmie4f5YN6HF6ZcEGuGSAlwtD
+
+		Type in the csrf in the URI: box_csrf_token_yH1sKQq5sL75BEt2
+
+</pre>
+	Note that if you take too long to cut/paste the code will expire and you'll have 
+	to do the steps again (iii).
+		
+### ocr.py
+Image processing toolkit, uses opencv (python cv2 -- which is a challenge to install)<br>
+http://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_gui/py_image_display/py_image_display.html<br>
+
+you will likely need/use/want matplotlib:<br>
+http://matplotlib.org/<br>
+http://matplotlib.org/users/pyplot_tutorial.html<br>
+
+
+//you can run this program by itself (there is a main routine), separate<br>
+//from jpeg_processor.py to learn and test it:<br>
+python ocr.py -h<br>
+
+
+This program use OCR to crop the JPEGs and extract the temperature from them as text.  There are 3 different cameras and each puts the temp in a different place.  The argument pictype to ocr.py distinquishes which of the three it is. See sample_files/README for details and examples<br>
+
+Successful output: python ocr.py 1 bone14.JPG <br>
+temp is: 70, trustworthy_if_false: False<br>
+
+If trustworthy_if_false is True then the OCR failed (see the code).<br>
+We perform no training on the data (something we should do if there are errors).<br>
+To see if there are errors, see the csv file produced by jpeg_processor.py<br>
+gzipped and checked into this directory:<br>
+	2014run.csv.gz 2015run.csv.gz 2015run.out.gz<br>
+The format of the csv file is:<br>
+   folder\subfolder\...\:prefix_YY-MM-DD_HH-MM-SS_ID,YY-MM-DD,HH-MM-SS,ID,size,temp,flash<br>
+
+edit ocr.py and set DEBUG to True and rerun to get more info<br>
+make sure and set DEBUG to False before running this on lots of files/production<br>
+as it is very verbose!<br>
+
+There are many different image processing operations in this file for reference.<br>
+
 
 ## Additional Info
 See the sample_images directory and README for using ocr.py component and test cases.<br>
