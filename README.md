@@ -94,8 +94,13 @@ The following program <br>
 
 if your python version (python -V) is 2.7 then you can just use python here:<br>
 
-python2.7 jpeg_processor.py /full/path/to/directory/of/interest sedgwick_map.json meta.csv >& meta.out<br>
+<tt>python2.7 jpeg_processor.py /full/path/to/directory/of/interest sedgwick_map.json meta.csv >& meta.out</tt><br>
 
 meta.csv will be created and will hold details on each file that is processed<br>
 meta.out will be created and will hold timings of different operations performed by the program<br>
 
+## Additional Info
+See the sample_images directory and README for using ocr.py component and test cases.<br>
+Additional images can be found there (request access if link doesn't work)<br>
+https://ucsb.app.box.com/files/0/f/7411611121/Sedgwick_Camera_Traps<br>
+The metadata (all file info) file is in this directory entitled Metadata: Sedgwick Camera Traps.xlsx<br>
