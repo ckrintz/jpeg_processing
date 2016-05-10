@@ -1,6 +1,8 @@
 # jpeg_processing
 Image processing, OCR, exim, and box.com upload tools
 
+Do not add/commit app.cfg or tokens.json into the repository!  They hold your private box app details. tokens.json is created for your automatically when you complete the oauth handshake initially.  The oauth handshake code is in upload_files.py.
+
 ## Setup Steps
 A) Install python2.7<br>
 python -V<br>
