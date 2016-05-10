@@ -2,12 +2,13 @@
 Image processing, OCR, exim, and box.com upload tools
 
 ## Setup Steps
-A) Install python2.7
-python -V
-	Python 2.7.10
-If the above does not print 2.7.something then make sure and use python2.7:
-python2.7 -V
-	Python 2.7.10
+A) Install python2.7<br>
+python -V<br>
+Python 2.7.10<br>
+
+If the above does not print 2.7.something then make sure and use python2.7:<br>
+python2.7 -V <br>
+Python 2.7.10<br>
 
 B) Install pip2.7 (you may need to prefix with sudo (for which you need admin priviledges to run))
 //install pip: sudo yum install python-pip
