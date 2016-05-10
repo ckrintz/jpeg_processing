@@ -27,7 +27,8 @@ sudo pip2.7 install --upgrade httplib2 requests exifread imutils<br>
 
 install cv2 for python:<br>
 switch to root: sudo -s<br>
-Assuming Linux Centos6<br>
+Assuming Linux Centos6 throughout<br>
+
 <tt>wget http://downloads.sourceforge.net/project/opencvlibrary/opencv-unix/3.1.0/opencv-3.1.0.zip?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fopencvlibrary%2F&ts=1462070500&use_mirror=pilotfiber<br>
 unzip opencv-3.1.0.zip<br>
 mv opencv-3.1.0.zip\?r\=https\:%2F%2Fsourceforge.net%2Fprojects%2Fopencvlibrary%2F opencv-3.1.0.zip<br>
@@ -65,4 +66,36 @@ python2.7<br>
 import cv2<br>
 //working if no error<br>
 quit()<br>
+
+## Program Input Setup
+Create a map in json format for each of the folders in box:<br>
+"shortname": ["folder_ID", "original filename prefix"]<br>
+
+sedgwick_map.json:
+<tt><pre>
+{
+    "Lisque": ["7413964473","Lisque Mesa 1"],
+    "Figueroa": ["7413966585","Figueroa Creek"],
+    "Windmill": ["7413968941","Lisque Mesa 1"],
+    "Main": ["7413970457","Main Road Water Hole"],
+    "Bone": ["7413971853","Bone Canyon Water Trough"],
+    "Northeast": ["7413973301","Northeast Corner Spring"],
+    "Vulture": ["7413975069","Vulture Trough"],
+    "Blue": ["7413976713","Blue Schist Water Hole"]
+}
+</pre></tt>
+
+You'll use this filename as an argument below<br>
+
+The following program <br>
+	- recursively scans a directory and all of its subdirectories<br>
+	- finds all *JPG files<br>
+	- extracts the metadata from the JPG <br>
+
+if your python version (python -V) is 2.7 then you can just use python here:<br>
+
+python2.7 jpeg_processor.py /full/path/to/directory/of/interest sedgwick_map.json meta.csv >& meta.out<br>
+
+meta.csv will be created and will hold details on each file that is processed<br>
+meta.out will be created and will hold timings of different operations performed by the program<br>
 
