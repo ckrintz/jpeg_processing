@@ -1,0 +1,44 @@
+#assumes python2.7 and cv2 installed
+python ../ocr.py 2 main15-3-ocr2.JPG
+python ../ocr.py 2 blue15-ocr2.JPG                       
+python ../ocr.py 2 main15-ocr2.JPG
+python ../ocr.py 1 bone14-trough-ocr1.JPG                
+python ../ocr.py 2 northeast14-ocr2.JPG
+python ../ocr.py 3 bone15-hole-ocr3.JPG                  
+python ../ocr.py 2 northeast14hot-ocr2.JPG
+python ../ocr.py 2 fig13-ocr2.JPG                        
+python ../ocr.py 2 vulture14-ocr2.JPG
+python ../ocr.py 2 lisque14-ocr2.JPG                     
+python ../ocr.py 1 windmill14-ocr1.JPG
+python ../ocr.py 2 main15-2-ocr2.JPG                     
+python ../ocr.py 2 windmill15-notemp-ocr1-produces?.JPG
+
+
+#expected output, note that any with True means, I'm not confident
+#temp of ? means there is no temp in the picture or I couldn't extract it
+$ python ../ocr.py 2 main15-3-ocr2.JPG
+temp is: 69, trustworthy_if_false: True
+$ python ../ocr.py 2 blue15-ocr2.JPG
+temp is: 81, trustworthy_if_false: False
+$ python ../ocr.py 2 main15-ocr2.JPG
+temp is: 95, trustworthy_if_false: False
+$ python ../ocr.py 1 bone14-trough-ocr1.JPG
+temp is: 70, trustworthy_if_false: False
+$ python ../ocr.py 2 northeast14-ocr2.JPG
+temp is: 93, trustworthy_if_false: False
+$ python ../ocr.py 3 bone15-hole-ocr3.JPG
+temp is: 73, trustworthy_if_false: False
+$ python ../ocr.py 2 northeast14hot-ocr2.JPG
+temp is: 104, trustworthy_if_false: False
+$ python ../ocr.py 2 fig13-ocr2.JPG
+temp is: 50, trustworthy_if_false: False
+$ python ../ocr.py 2 vulture14-ocr2.JPG
+temp is: 81, trustworthy_if_false: False
+$ python ../ocr.py 2 lisque14-ocr2.JPG
+temp is: 78, trustworthy_if_false: False
+$ python ../ocr.py 1 windmill14-ocr1.JPG
+temp is: 55, trustworthy_if_false: False
+$ python ../ocr.py 2 main15-2-ocr2.JPG
+temp is: 69, trustworthy_if_false: True
+$ python ../ocr.py 2 windmill15-notemp-ocr1-produces?.JPG
+temp is: ?, trustworthy_if_false: True

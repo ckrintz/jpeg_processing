@@ -1,0 +1,13 @@
+OCR picindex values
+-------------------
+windmill: 1
+main: 2
+fig: 2
+lisque: 2
+bone trough: 1
+bone hole: 3
+northeast: 2
+vulture: 2
+blue: 2
+
+python2.7 ocr.py PICINDEX
