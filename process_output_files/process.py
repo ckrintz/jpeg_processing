@@ -10,6 +10,7 @@ import csv
 import json, sys, argparse, csv, logging, os, time
 import numpy as np
 from datetime import datetime, timedelta
+import dbiface
 
 DEBUG=False
 def main():
@@ -27,6 +28,11 @@ def main():
     dtdict = {}
     DEBUG = args.debug
 
+    db = dbiface.DBobj('wtbdb')
+    db.importCSVwHeader(args.fname)
+    db.closeConnection()
+    
+    '''
     #open the csv file for writing out dataset for plotting: datetime loc1_temp loc2_temp ... loc9_temp
     locs = ["Lisque","Figueroa","Windmill","Main","BoneT","BoneH","NE","Vulture","Blue"]
     with open(args.outfname,'wt') as fout:
@@ -47,6 +53,7 @@ def main():
 		dt = datetime.strptime(ts, '%Y-%M-%D %H:%M:%S')
 		dtdict[dt] = temp
 	
+    '''
 
 if __name__ == '__main__':
     main()

@@ -19,6 +19,16 @@ class DBobj(object):
     def getCursor(self):
         return self.conn.cursor()
 
+    def importCSVwHeader(self,fname):
+        cur = self.conn.cursor()
+        copy_sql = """
+           COPY table_name FROM stdin WITH CSV HEADER
+           DELIMITER as ','
+           """
+        with open(path, 'r') as f:
+            cur.copy_expert(sql=copy_sql, file=f)
+            conn.commit()
+
     def closeConnection(self):
         if self.conn:
 	    self.conn.close()
@@ -32,8 +42,6 @@ def main():
     print ver 
 
     db.closeConnection()
-    
-
     
 
 if __name__ == '__main__':
