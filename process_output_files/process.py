@@ -8,6 +8,7 @@ Windmill\2015\11\08:Windmill_2015-11-08_23:08:55_091.JPG,2015-11-08,23:08:55,091
 
 import csv
 import json, sys, argparse, csv, logging, os, time
+import numpy as np
 from datetime import datetime, timedelta
 
 DEBUG=False
@@ -34,18 +35,17 @@ def main():
             for row in csvFile:
                 print row
 	        #{'temp': '51', 'flash': 'NoFlash', 'bad_temp': 'False', 'box_path:filename': 'Bone\\2015\\09\\16:BoneH_2015-09-16_22:30:48_1499.JPG', 'time': '22:30:48', 'date': '2015-09-16', 'orig_fname': 'RCNX1499.JPG', 'ID': '1499', 'size': '1700891'}
-                if not row['bad_temp']:
-		    #extract filename
-		    this_prefix = row['box_path:filename'].split(':')[1]
-		    #extract prefix from filename
-		    this_loc = this_prefix.split('_')[0]
+		#extract filename
+		this_prefix = row['box_path:filename'].split(':')[1]
+		#extract prefix from filename
+		this_loc = this_prefix.split('_')[0]
 		    
-		    #dt: {loc: value}  however there may be multiple dt's for a loc
+		#dt: {loc: value}  however there may be multiple dt's for a loc
 			
-                    temp = row['temp']
-		    ts = '{0} {1}'.format(row['date'],row['time'])
-		    dt = datetime.strptime(ts, '%Y-%M-%D %H:%M:%S')
-		    dtdict[dt] = temp
+                temp = row['temp']
+		ts = '{0} {1}'.format(row['date'],row['time'])
+		dt = datetime.strptime(ts, '%Y-%M-%D %H:%M:%S')
+		dtdict[dt] = temp
 	
 
 if __name__ == '__main__':
