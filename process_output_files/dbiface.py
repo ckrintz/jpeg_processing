@@ -19,7 +19,7 @@ class DBobj(object):
     def getCursor(self):
         return self.conn.cursor()
 
-    def importCSVwHeader(self,fname):
+    def importCSVwHeader(self,fname): #CSV file has a header line/row
         cur = self.conn.cursor()
         copy_sql = """
            COPY table_name FROM stdin WITH CSV HEADER
@@ -27,6 +27,13 @@ class DBobj(object):
            """
         with open(path, 'r') as f:
             cur.copy_expert(sql=copy_sql, file=f)
+            conn.commit()
+
+    def appendCSV(self,fname,tname): #CSV file has no header
+        cur = self.conn.cursor()
+        with open(path, 'r') as f:
+ 	    #disallows adding repeat keys
+            cur.copy_from(f, tname, sep=',')
             conn.commit()
 
     def closeConnection(self):
