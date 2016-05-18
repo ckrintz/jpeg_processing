@@ -41,10 +41,11 @@ def main():
         print 'Problem creating table {0}'.format(tname)
         sys.exit(1)
 
-    sql = 'SELECT * FROM {0}'.format(dbname)
+    sql = 'SELECT * FROM {0}'.format(tname)
     try:
         cur.execute(sql)
-    except:
+    except Exception as e:
+	print e
         print '1Problem selecting from {0}'.format(tname)
         sys.exit(1)
 
