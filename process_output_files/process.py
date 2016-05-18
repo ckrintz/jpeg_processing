@@ -41,12 +41,19 @@ def main():
         print 'Problem creating table {0}'.format(tname)
         sys.exit(1)
 
+    sql = 'SELECT * FROM {0}'.format(dbname)
+    try:
+        cur.execute(sql)
+    except:
+        print '1Problem selecting from {0}'.format(tname)
+        sys.exit(1)
+
     if args.adddata:
         db.appendCSV(args.fname,tname)
     else:
         db.importCSVwHeader(args.fname,tname)
 
-    sql = 'SELECT * FROM pg_database'
+    sql = 'SELECT * FROM {0}'.format(dbname)
     try:
         cur.execute(sql)
     except:

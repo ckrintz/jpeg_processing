@@ -12,24 +12,24 @@ class DBobj(object):
         args = "dbname='{0}' user='postgres' host='{1}'".format(dbname,host)
         try:
             self.conn = psycopg2.connect(args)
-        except:
+        except Exception as e:
+  	    print e
             print 'Problem connecting to DB'
             sys.exit(1)
     
     def getCursor(self):
         return self.conn.cursor()
 
-    def importCSVwHeader(self,fname): #CSV file has a header line/row
+    def importCSVwHeader(self,fname,tname): #CSV file has a header line/row
+	#CSV must match db schema exactly
         cur = self.conn.cursor()
-        copy_sql = """
-           COPY table_name FROM stdin WITH CSV HEADER
-           DELIMITER as ','
-           """
-        with open(path, 'r') as f:
+        copy_sql = "COPY {0} FROM stdin WITH CSV HEADER DELIMITER as ','".format(tname)
+        with open(fname, 'r') as f:
             cur.copy_expert(sql=copy_sql, file=f)
             conn.commit()
 
     def appendCSV(self,fname,tname): #CSV file has no header
+	#CSV must match db schema exactly
         cur = self.conn.cursor()
         with open(path, 'r') as f:
  	    #disallows adding repeat keys
