@@ -35,12 +35,14 @@ def main():
     sql = 'CREATE TABLE IF NOT EXISTS {0}(ts TIMESTAMP PRIMARY KEY, prefix VARCHAR(20), pid INT, temp INT, size INT, flash BOOL, badtemp BOOL, boxdir VARCHAR(32))'.format(tname)
     db = dbiface.DBobj(dbname)
     cur = db.getCursor()
+    execute_sql(db,cur,sql)
     try:
         cur.execute(sql)
     except:
         print 'Problem creating table {0}'.format(tname)
         sys.exit(1)
-
+    
+    db.commit()
     sql = 'SELECT * FROM {0}'.format(tname)
     try:
         cur.execute(sql)

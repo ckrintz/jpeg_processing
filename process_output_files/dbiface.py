@@ -17,6 +17,9 @@ class DBobj(object):
             print 'Problem connecting to DB'
             sys.exit(1)
     
+    def commit(self):
+        return self.conn.commit()
+
     def getCursor(self):
         return self.conn.cursor()
 
