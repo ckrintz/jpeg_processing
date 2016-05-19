@@ -42,6 +42,13 @@
 		http://www.thegeekstuff.com/2009/04/15-practical-postgresql-database-adminstration-commands/
 		http://www.postgresqltutorial.com/postgresql-data-types/
 
+		- practice your SQL using the psql command line (this will help you debug)
+		- all SQL ends in a ;		psql commands do not
+		Get all dbs: SELECT datname FROM pg_database;
+		Get all public table names: SELECT table_schema,table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_schema,table_name;
+		List all tables using postgres command line: \dt
+		Create a table: CREATE TABLE IF NOT EXISTS tablename (ts TIMESTAMP, val INT, flag BOOL)
+		Create a table without checking: CREATE TABLE tablename (ts TIMESTAMP, val INT, name VARCHAR(20))
 
 
 2) The programs in this directory, read in the CSV file produced from ../jpeg_processor.py

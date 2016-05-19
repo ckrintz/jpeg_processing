@@ -1,3 +1,4 @@
+'''Author: Chandra Krintz, UCSB, ckrintz@cs.ucsb.edu, AppScale BSD license'''
 import psycopg2, sys
 
 DEBUG=False
@@ -17,6 +18,16 @@ class DBobj(object):
             print 'Problem connecting to DB'
             sys.exit(1)
     
+    def execute_sql(self,sql):
+        cur = self.conn.cursor()
+        try:
+            cur.execute(sql)
+            self.conn.commit()
+        except Exception as e:
+	    print e
+            print 'SQL problem:\n\t{0}'.format(sql)
+            sys.exit(1)
+
     def commit(self):
         return self.conn.commit()
 

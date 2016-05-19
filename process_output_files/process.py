@@ -34,35 +34,21 @@ def main():
     #{'temp': '51', 'flash': 'NoFlash', 'bad_temp': 'False', 'box_path:filename': 'Bone\\2015\\09\\16:BoneH_2015-09-16_22:30:48_1499.JPG', 'time': '22:30:48', 'date': '2015-09-16', 'orig_fname': 'RCNX1499.JPG', 'ID': '1499', 'size': '1700891'}
     sql = 'CREATE TABLE IF NOT EXISTS {0}(ts TIMESTAMP PRIMARY KEY, prefix VARCHAR(20), pid INT, temp INT, size INT, flash BOOL, badtemp BOOL, boxdir VARCHAR(32))'.format(tname)
     db = dbiface.DBobj(dbname)
-    cur = db.getCursor()
-    execute_sql(db,cur,sql)
-    try:
-        cur.execute(sql)
-    except:
-        print 'Problem creating table {0}'.format(tname)
-        sys.exit(1)
-    
-    db.commit()
-    sql = 'SELECT * FROM {0}'.format(tname)
-    try:
-        cur.execute(sql)
-    except Exception as e:
-	print e
-        print '1Problem selecting from {0}'.format(tname)
-        sys.exit(1)
+    #cur = db.getCursor() #we don't really need the cursor outside of dbiface, but can get it any time
+    db.execute_sql(sql)
 
-    if args.adddata:
+    #read what is in the db before the import
+    sql = 'SELECT * FROM {0}'.format(tname)
+    db.execute_sql(sql)
+
+    if args.adddata: #append
         db.appendCSV(args.fname,tname)
-    else:
+    else: #overwrite (deletes all data in the db first)
         db.importCSVwHeader(args.fname,tname)
 
-    sql = 'SELECT * FROM {0}'.format(dbname)
-    try:
-        cur.execute(sql)
-    except:
-        print 'Problem selecting from {0}'.format(tname)
-        sys.exit(1)
-
+    #read what is in the db after the import
+    sql = 'SELECT * FROM {0}'.format(tname)
+    db.execute_sql(sql)
     db.closeConnection()
     
     '''
