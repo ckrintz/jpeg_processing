@@ -51,7 +51,7 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
                 if ele.endswith(".JPG") and (preflong in fname):
 
                     #extract the photo ID from the file name
-		    #filenames are IMAG0ID.JPG, IMG_ID.JPG, RCNXID.JPG
+		    #filenames are IMAG0ID.JPG, IMG_ID.JPG, RCNXID.JPG for each different camera
                     if printAll:
 		        print 'ele: {0}'.format(ele)
                     if ele.startswith('IMAG'):
@@ -66,13 +66,15 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
                     print 'PID: {0}, {1}'.format(ele, photo_id)
                     if printAll:
                         print 'processing {0}'.format(ele)
+
+		    #open the JPG, read its metainformation (print it out), then send the 
+		    #info on to process_jpeg_file (includes date/time taken)
                     with open(fname, 'rb') as fjpeg:
                         tags = exifread.process_file(fjpeg)
-                        #if printAll:
-                            #for tag in tags.keys():
-                                #if tag not in ('JPEGThumbnail', 'TIFFThumbnail'):
-                                    #print "Key: %s --> value %s" % (tag, tags[tag])
-                                    #print "Key: %s" % (tag)
+                        if printAll and DEBUG:
+                            for tag in tags.keys():
+                                if tag not in ('JPEGThumbnail', 'TIFFThumbnail'):
+                                    print 'Key: {0} --> value {1}'format(tag, tags[tag])
                         try:
                             process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,key,printAll)
                         except Exception as e:
@@ -89,7 +91,7 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
             else:
                 tags = exifread.process_file(f, stop_tag=stop_tag)
                 if printAll:
-                    print "Key: %s, value %s" % (stop_tag, tags[stop_tag])
+                    print 'Key: {0}, value {1}'.format(stop_tag, tags[stop_tag])
                 fname = os.path.abspath(fn)
                 #prefix = 'fake_prefix'
                 try:
