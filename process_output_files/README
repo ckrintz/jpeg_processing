@@ -45,6 +45,12 @@
 		- practice your SQL using the psql command line (this will help you debug)
 		- all SQL ends in a ;		psql commands do not
 			if you forget this, you get a continuation prompt (single arrow, type ;)
+		- SQL expects quoted text to be in single quotes
+			select * from metainfo where dt > '2015-11-13';
+		- capitals are not required but nice to indicate which terms are SQL:
+			SELECT * FROM metainfo WHERE dt > '2015-11-13';
+		- count instead of returning
+			SELECT count(*) FROM metainfo WHERE dt > '2015-11-13';
 
 		Get all dbs: SELECT datname FROM pg_database;
 		Get all public table names: SELECT table_schema,table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_schema,table_name;

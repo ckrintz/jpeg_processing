@@ -27,6 +27,7 @@ class DBobj(object):
 	    print e
             print 'execute_sql: SQL problem:\n\t{0}'.format(sql)
             sys.exit(1)
+        return cur
 
     def commit(self):
         return self.conn.commit()

@@ -38,23 +38,35 @@ def main():
     #create a table with the same fields/types as the CSV so that we can do one big import
     #temp is text b/c it may contain a ? when there is no temperature 
     #    in the picture or when OCR fails to extract it
-    sql = 'CREATE TABLE IF NOT EXISTS {0}(boxfname TEXT, dt DATE, ti TIME, pid INT, size INT, temp TEXT, flash TEXT, badtemp BOOL, origfname TEXT)'.format(tname)
+    sql = "CREATE TABLE IF NOT EXISTS {0}(boxfname TEXT, dt DATE, ti TIME, pid INT, size INT, temp TEXT, flash TEXT, badtemp BOOL, origfname TEXT);".format(tname)
     db = dbiface.DBobj(dbname)
-    #cur = db.getCursor() #we don't really need the cursor outside of dbiface, but can get it any time
     db.execute_sql(sql)
 
     #read what is in the db before the import
-    sql = 'SELECT * FROM {0}'.format(tname)
-    db.execute_sql(sql)
-
+    sql = "SELECT * FROM {0};".format(tname)
+    cur = db.execute_sql(sql)
+    if DEBUG: 
+        print 'Before:'
+        rows = cur.fetchall()
+        for row in rows:
+            print row
+    
     if args.adddata: #append
         db.appendCSV(args.fname,tname)
     else: #overwrite (deletes all data in the db first)
         db.importCSVwHeader(args.fname,tname)
 
-    #read what is in the db after the import
-    sql = 'SELECT * FROM {0}'.format(tname)
-    db.execute_sql(sql)
+    #read what is in the db after the import - use single quotes nested in outer double quotes
+    #because SQL requires single
+    sql = "SELECT * FROM {0} WHERE dt > '2015-01-01' AND dt < '2015-05-23';".format(tname)
+    #other examples to try
+    #sql = "SELECT * FROM {0} WHERE dt > '2015-01-01' AND dt < now();".format(tname)
+    #sql = "SELECT * FROM {0} WHERE dt BETWEEN '2015-01-01' AND dt < now();".format(tname)
+    #sql = "SELECT count(*) FROM {0} WHERE dt > '2015-01-01' AND dt < '2015-05-23';".format(tname)
+    cur = db.execute_sql(sql)
+    rows = cur.fetchall()
+    for row in rows:
+        print row
     db.closeConnection()
     
     '''
