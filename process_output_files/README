@@ -51,6 +51,9 @@
 			SELECT * FROM metainfo WHERE dt > '2015-11-13';
 		- count instead of returning
 			SELECT count(*) FROM metainfo WHERE dt > '2015-11-13';
+		- selct on boolean type (assuming badtemp is Bool here)
+			select count(*) from metainfo where not badtemp;
+			select count(*) from metainfo where badtemp;
 
 		Get all dbs: SELECT datname FROM pg_database;
 		Get all public table names: SELECT table_schema,table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_schema,table_name;
