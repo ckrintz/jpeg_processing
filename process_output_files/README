@@ -1,0 +1,57 @@
+
+1) Setup
+
+	- install postgres (v9.4 or larger)
+	
+	- related packages
+		- install postgis
+		- pip install psycopg2  #python interface to postgres
+
+	- start postgres
+		- one time only (tell postgres where to put its databases (change path to suit your system)
+		initdb -D /usr/local/var/postgres
+
+		- each time you reboot or after turning postgres daemon/server off (path must match above)
+		pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start
+
+		- when postgres server on, one time only make a postgres user and DB 
+		createuser -P postgres		#remember the PASSWORD, you will use it below in .pgpass
+		create wtbdb
+		
+		#use the postgres command line to give privileges to user postgres
+		psql wtbdb
+		#at psql prompt:
+			GRANT ALL PRIVILEGES ON database wtbdb TO postgres;
+		\q 	#exits psql
+		psql commands are here: http://beige.ucs.indiana.edu/I590/node150.html
+
+		- setup the username and password in a hidden file for use by python scripts
+		#edit .pgpass in your home directory, place this line in it and save:
+		localhost:5432:wtbdb:postgres:PASSWORD
+
+		- test that you have this all working by running
+		python dbiface.py
+		#this should run without error and print the postgress version
+
+		- when you shutdown your machine or when you are done with postgres, turn it off
+		pg_ctl -D /usr/local/var/postgres stop
+
+	- postgres and SQL references/help
+		Commands and types
+		http://www.postgresql.org/docs/9.4/static/functions-datetime.html
+		http://www.thegeekstuff.com/2009/04/15-practical-postgresql-database-adminstration-commands/
+		http://www.postgresqltutorial.com/postgresql-data-types/
+
+
+
+2) The programs in this directory, read in the CSV file produced from ../jpeg_processor.py
+about each of the pictures that it processes.  We read in the file and store it in a postgres
+database so that we can query the data easily.
+
+The format (schema) of the database is the same as the CSV file so that we can import the 
+CSV file with one command into the database.  
+
+All programs have a main routine (so that each can be executed/tested directly).
+The program process.py calls the file/library dbiface.py.   All of the db operations are in dbiface.
+
+The complete CSV file is in all.csv.gz.  Gunzip it prior to passing it into process.py
