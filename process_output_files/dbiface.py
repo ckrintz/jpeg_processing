@@ -37,6 +37,7 @@ class DBobj(object):
     def importCSVwHeader(self,fname,tname): #CSV file has a header line/row
 	#CSV must match db schema exactly
         cur = self.conn.cursor()
+        cur.execute("SET CLIENT_ENCODING TO 'LATIN1';")
         copy_sql = "COPY {0} FROM stdin WITH CSV HEADER DELIMITER as ','".format(tname)
         with open(fname, 'r') as f:
             cur.copy_expert(sql=copy_sql, file=f)

@@ -31,8 +31,14 @@ def main():
 
     dbname = 'wtbdb'
     tname = 'metainfo'
+
+    #CSV header and example key/value pairs in a row
+    #box_path:filename,date,time,ID,size,temp,flash,bad_temp,orig_fname
     #{'temp': '51', 'flash': 'NoFlash', 'bad_temp': 'False', 'box_path:filename': 'Bone\\2015\\09\\16:BoneH_2015-09-16_22:30:48_1499.JPG', 'time': '22:30:48', 'date': '2015-09-16', 'orig_fname': 'RCNX1499.JPG', 'ID': '1499', 'size': '1700891'}
-    sql = 'CREATE TABLE IF NOT EXISTS {0}(ts TIMESTAMP PRIMARY KEY, prefix VARCHAR(20), pid INT, temp INT, size INT, flash BOOL, badtemp BOOL, boxdir VARCHAR(32))'.format(tname)
+    #create a table with the same fields/types as the CSV so that we can do one big import
+    #temp is text b/c it may contain a ? when there is no temperature 
+    #    in the picture or when OCR fails to extract it
+    sql = 'CREATE TABLE IF NOT EXISTS {0}(boxfname TEXT, dt DATE, ti TIME, pid INT, size INT, temp TEXT, flash TEXT, badtemp BOOL, origfname TEXT)'.format(tname)
     db = dbiface.DBobj(dbname)
     #cur = db.getCursor() #we don't really need the cursor outside of dbiface, but can get it any time
     db.execute_sql(sql)
