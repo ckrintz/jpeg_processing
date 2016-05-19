@@ -32,6 +32,9 @@ tar -xzf images.tgz
 - when you run these, they bring up lots of windows that result from the the different image processing steps, hit Enter on them to get them to go away
 
 #uses categorize_pics.py functions/library
+#separate out Day and Night pictures (there are bases for both)
+
+python test.py bases/LisqueDarkEmpty2.JPG todel/LisqueNightCat.JPG
 
 
 - The following uses the "hardest" camera location (figcreek) -- I don't advise you start here.  I suggest that you use better locations
@@ -81,6 +84,8 @@ Put the images in a directory and pass that in instead of figcreek
 - the steps in the test.py process
 This all was taken from this example (without motion detection piece):
 	http://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
+
+Notes: we use blur to distinguish night from day and I found we should use use mse and ssim > 85
 
 plotting and comparing histograms 
 http://www.pyimagesearch.com/2014/07/14/3-ways-compare-histograms-using-opencv-python/
