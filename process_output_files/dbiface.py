@@ -25,7 +25,7 @@ class DBobj(object):
             self.conn.commit()
         except Exception as e:
 	    print e
-            print 'SQL problem:\n\t{0}'.format(sql)
+            print 'execute_sql: SQL problem:\n\t{0}'.format(sql)
             sys.exit(1)
 
     def commit(self):
@@ -37,19 +37,32 @@ class DBobj(object):
     def importCSVwHeader(self,fname,tname): #CSV file has a header line/row
 	#CSV must match db schema exactly
         cur = self.conn.cursor()
-        cur.execute("SET CLIENT_ENCODING TO 'LATIN1';")
-        copy_sql = "COPY {0} FROM stdin WITH CSV HEADER DELIMITER as ','".format(tname)
-        with open(fname, 'r') as f:
-            cur.copy_expert(sql=copy_sql, file=f)
-            conn.commit()
+        copy_sql = ''
+        try:
+	    #delete the table if it exists
+            cur.execute("DELETE FROM {0};".format(tname))
+            cur.execute("SET CLIENT_ENCODING TO 'LATIN1';")
+            copy_sql = "COPY {0} FROM stdin WITH CSV HEADER DELIMITER as ',';".format(tname)
+            with open(fname, 'r') as f:
+                cur.copy_expert(sql=copy_sql, file=f)
+                self.conn.commit()
+        except Exception as e:
+	    print e
+            print 'importCSVwHeader: SQL problem:\n\t{0}'.format(copy_sql)
+            sys.exit(1)
 
     def appendCSV(self,fname,tname): #CSV file has no header
 	#CSV must match db schema exactly
         cur = self.conn.cursor()
-        with open(path, 'r') as f:
- 	    #disallows adding repeat keys
-            cur.copy_from(f, tname, sep=',')
-            conn.commit()
+        try: 
+            with open(path, 'r') as f:
+ 	            #disallows adding repeat keys
+                cur.copy_from(f, tname, sep=',')
+                self.conn.commit()
+        except Exception as e:
+	    print e
+            print 'appendCSV: SQL problem (copy_from)'
+            sys.exit(1)
 
     def closeConnection(self):
         if self.conn:
