@@ -1,0 +1,95 @@
+cd compare_images
+
+----------------------------------------
+0) Check your version of opencv:
+appscale:compare_images ckrintz$ python 
+	Python 2.7.10 (default, Nov  9 2015, 09:34:02) 
+	[GCC 4.2.1 Compatible Apple LLVM 7.0.0 (clang-700.1.76)] on darwin
+	Type "help", "copyright", "credits" or "license" for more information.
+>>> from cv2 import __version__
+>>> __version__
+'3.1.0'
+>>> quit()
+
+#anything 3.1.0 or larger is fine
+
+----------------------------------------
+1) Some additional installations that are needed:
+pip install sklearn pytesseract numpy matplotlib imutils psycopg2 scipy
+
+----------------------------------------
+2) Copy over the base images (bases) and images with animals (figcreek)
+and unpackage it
+
+wget http://www.cs.ucsb.edu/~ckrintz/images.tgz
+tar -xzf images.tgz
+
+#this will produce the two folders bases and figcreek
+
+----------------------------------------
+3) Run the program: test.py to find large animals in pictures
+- check out and play with the program parameters (python test.py --help) 
+- when you run these, they bring up lots of windows that result from the the different image processing steps, hit Enter on them to get them to go away
+
+#uses categorize_pics.py functions/library
+
+
+- The following uses the "hardest" camera location (figcreek) -- I don't advise you start here.  I suggest that you use better locations
+like main, lisque, windmill
+To use a different camera -- use the base picture for the location in bases (e.g. Main*) and download a bunch of different images from box from the same location:
+https://ucsb.app.box.com/files/0/f/7411611121/Sedgwick_Camera_Traps
+Main and Windmill are the next best.
+Put the images in a directory and pass that in instead of figcreek/imagename.JPG below
+
+somewhat works:
+python test.py --x1=100 --y1=50 --x2=400 --y2=250 --min_area=500 --thresh=70 bases/FigCreekNight.JPG figcreek/BearDark5.JPG
+python test.py --x1=100 --y1=50 --x2=400 --y2=250 --min_area=500 --thresh=40 bases/FigCreekNight.JPG figcreek/PigNight2.JPG
+python test.py --x1=100 --y1=50 --x2=400 --y2=250 --min_area=500 --thresh=60 bases/FigCreekDay.JPG figcreek/DeerDay.JPG
+python test.py --x1=100 --y1=50 --x2=400 --y2=250 --min_area=500 --thresh=100 bases/FigCreekGrayDay.JPG figcreek/DogDayGray.JPG
+python test.py --x1=100 --y1=50 --x2=400 --y2=250 --min_area=500 --thresh=100 bases/FigCreekDay.JPG figcreek/DeerDayGray.JPG
+python test.py --x1=100 --y1=50 --x2=400 --y2=250 --min_area=500 --thresh=70 bases/FigCreekDay.JPG figcreek/DeerDay.JPG
+python test.py --x1=100 --y1=50 --x2=400 --y2=250 --min_area=500 --thresh=30 bases/FigCreekNight.JPG figcreek/BearDark5.JPG
+
+sort of works:
+python test.py --x1=100 --y1=50 --x2=400 --y2=250 --min_area=500 --thresh=120 FigCreekBright.JPG figcreek/Person.JPG
+python test.py --x1=100 --y1=50 --x2=400 --y2=250 --min_area=500 --thresh=130 FigCreekDay.JPG figcreek/Person.JPG
+
+doesn't work:
+python test.py bases/FigCreekDay.JPG figcreek/DeerDay.JPG
+python test.py --x1=100 --y1=50 --x2=400 --y2=250  bases/FigCreekGrayDay.JPG figcreek/DeerDay.JPG
+python test.py --x1=100 --y1=50 --x2=400 --y2=250 --min_area=500 --thresh=70 bases/FigCreekDay.JPG figcreek/DeerDay4.JPG
+
+----------------------------------------
+4) Run the program: image_sim.py to run a simulation that checks if the image is "different enough" from the base image, if so, it pretends to ship it somewhere for processing.
+You can view the result (each pair of pictures and their SSIM and MSE values) by adding the -p option
+Click the topleft X in the display tool to move to the next pair
+
+- The following uses the "hardest" camera location (figcreek) -- I don't advise you start here.  I suggest that you use better locations
+like main, lisque, windmill
+
+python image_sim.py -b bases/FigCreekNight.JPG figcreek/
+#uses categorize_pics.py functions/library
+
+To use a different camera -- use the base picture for the location in bases (e.g. Main*) and download a bunch of different images from box from the same location:
+https://ucsb.app.box.com/files/0/f/7411611121/Sedgwick_Camera_Traps
+Main and Windmill are the next best.
+Put the images in a directory and pass that in instead of figcreek
+
+----------------------------------------
+5) Things to understand
+- how cropping works (how to set the x1,x2,y1,y2 values)
+- the steps in the test.py process
+This all was taken from this example (without motion detection piece):
+	http://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
+
+plotting and comparing histograms 
+http://www.pyimagesearch.com/2014/07/14/3-ways-compare-histograms-using-opencv-python/
+
+image thresholding:
+http://docs.opencv.org/3.1.0/d7/d4d/tutorial_py_thresholding.html#gsc.tab=0
+
+k-means clustering for images:
+http://www.pyimagesearch.com/2014/05/26/opencv-python-k-means-color-clustering/
+
+
+
