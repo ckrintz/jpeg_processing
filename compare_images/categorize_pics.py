@@ -8,7 +8,7 @@ import numpy as np
 
 #library used by test.py and image_sim.py
 
-DEBUG=False
+DEBUG=True
 index = {} #dictionary to hold the histograms
 PIXEL_MAX = 255.0
 

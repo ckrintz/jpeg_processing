@@ -2,7 +2,7 @@ import argparse,datetime,imutils,time,cv2,sys,os
 import matplotlib.pyplot as plt
 import categorize_pics
 
-DEBUG=False
+DEBUG=True
 SSIM_DIFF=0.7
 def convert(fname,blur=True):
     '''
