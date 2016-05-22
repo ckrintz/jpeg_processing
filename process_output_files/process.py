@@ -12,11 +12,10 @@ def main():
     logging.basicConfig()
     parser = argparse.ArgumentParser(description='CSV File Processing')
     #required arguments
-    parser.add_argument('fname',action='store',help='CSV file to import into DB (overwrite table)')
+    parser.add_argument('fname',action='store',help='CSV file (must have header row) to import into DB')
     parser.add_argument('outfname',action='store',help='text file to output for plotting')
     #optional arguments
-    parser.add_argument('--overWrite',action='store_true',default=False,help='overwrite db table with data in this CSV (default is to append)')
-    parser.add_argument('--hasHeader',action='store_true',default=False,help='CSV has header row (default is has no header)')
+    parser.add_argument('--overWrite',action='store_true',default=False,help='overwrite entire db table with data in this CSV (default is to append, skipping keys that exists (date,time,ID))')
     parser.add_argument('--debug',action='store_true',default=False,help='Turn debugging on')
     args = parser.parse_args()
 
@@ -38,9 +37,9 @@ def main():
 
     SQL should be in double quotes so that single quotes can be used for internal/nested strings
     '''
-    sql = "CREATE TABLE IF NOT EXISTS {0}(boxfname TEXT, dt DATE, ti TIME, pid INT, size INT, temp TEXT, flash TEXT, badtemp BOOL, origfname TEXT, CONSTRAINT pk PRIMARY KEY (dt, ti, pid));".format(tname)
+    sql = "CREATE TABLE IF NOT EXISTS {0}(boxfname TEXT, dt DATE, ti TIME, pid INT, size INT, temp TEXT, flash TEXT, badtemp BOOL, origfname TEXT, PRIMARY KEY (dt, ti, pid));".format(tname)
     db = dbiface.DBobj(dbname)
-    db.execute_sql(sql)
+    cur = db.execute_sql(sql)
 
     #read what is in the db before the import
     sql = "SELECT * FROM {0};".format(tname)
@@ -51,7 +50,7 @@ def main():
         for row in rows:
             print row
     
-    db.importCSV(args.fname,tname,args.hasHeader,args.overWrite)
+    db.importCSV(args.fname,tname,args.overWrite)
 
     #read what is in the db after the import - use single quotes nested in outer double quotes
     #because SQL requires single

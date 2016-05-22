@@ -34,7 +34,7 @@ class DBobj(object):
     #import a CVS file into a table (empty the table first)
     #we expect that the caller has created the table already with the right schema
     #the table schema must match the CSV columns exactly or there will be error
-    def importCSV(self,fname,tname,hasHeader=True,overwrite=False): 
+    def importCSV(self,fname,tname,overwrite=False): 
 	#CSV must match db schema exactly
         cur = self.conn.cursor()
         copy_sql = ''
@@ -43,24 +43,29 @@ class DBobj(object):
 	        #delete the table if it exists
                 cur.execute("DELETE FROM {0};".format(tname))
 
-	    #account for header if there is one
-	    #http://www.postgresql.org/docs/9.2/static/sql-copy.html
-            if hasHeader:
-                copy_sql = "COPY {0} FROM STDIN WITH CSV HEADER DELIMITER as ',';".format(tname)
-	    else:
-                copy_sql = "COPY {0} FROM STDIN WITH ENCODING 'latin1';".format(tname)
-                #copy_sql = "COPY {0} FROM STDIN WITH DELIMITER ',' ENCODING 'latin1';".format(tname)
+	    #create a temp table that matches tname
+	    cur.execute("CREATE TEMP TABLE tmp_table AS SELECT * FROM {0} WITH NO DATA;".format(tname))
 
+	    #account for header if there is one -- this mass copy only works with header 
+	    #http://www.postgresql.org/docs/9.2/static/sql-copy.html
+            copy_sql = "COPY tmp_table FROM STDIN WITH CSV HEADER DELIMITER as ',';"
 	    #avoid getting utf8 errors reading in data
             cur.execute("SET CLIENT_ENCODING TO 'latin1';")
-
 	    #read in the file
             with open(fname, 'r') as f:
                 cur.copy_expert(sql=copy_sql, file=f)
                 self.conn.commit()
+
+	    #copy the data from tmp_table (if not in tname) to tname then delete tmp_table
+	    #sql = "INSERT INTO {0} SELECT DISTINCT ON (dt,ti,pid) * FROM tmp_table ORDER BY dt,ti,pid;".format(tname)
+	    sql = "BEGIN; LOCK TABLE {0} IN SHARE ROW EXCLUSIVE MODE; INSERT INTO {0} SELECT * FROM tmp_table tt WHERE NOT EXISTS ( SELECT dt,ti,pid FROM {0} WHERE dt=tt.dt AND ti=tt.ti AND pid=tt.pid ); COMMIT;".format(tname)
+	    cur.execute(sql)
+	    cur.execute("DROP TABLE tmp_table;".format(tname))
+            self.conn.commit()
+
         except Exception as e:
 	    print e
-            print 'importCSV: SQL problem:\n\t{0}'.format(copy_sql)
+            print 'importCSV: SQL problem:\n\t{0}\n\t'.format(copy_sql,sql)
             sys.exit(1)
 
     def closeConnection(self):
