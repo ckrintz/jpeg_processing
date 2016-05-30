@@ -74,7 +74,7 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
                         if printAll and DEBUG:
                             for tag in tags.keys():
                                 if tag not in ('JPEGThumbnail', 'TIFFThumbnail'):
-                                    print 'Key: {0} --> value {1}'format(tag, tags[tag])
+                                    print 'Key: {0} --> value {1}'.format(tag, tags[tag])
                         try:
                             process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,key,printAll)
                         except Exception as e:
