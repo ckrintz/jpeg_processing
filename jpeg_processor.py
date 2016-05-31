@@ -131,8 +131,10 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
         d = (dt_tag.split()[0]).replace(':','-')
         t = dt_tag.split()[1]
 
+    day_folder = None  #set either from cache (fast) or by going to box (slow)
+    folder_name = prefix
+
     #check folder, create if needed
-    folder_name = folder['name']
     splitd = d.split('-')
     yr = splitd[0]
     mo = splitd[1]
@@ -141,34 +143,34 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
     if DEBUG:
         print 'yr: {0}, mo: {1}, dy: {2}, foldername: {3}'.format(yr,mo,dy,folder_name)
 
-    day_folder = None  #set either from cache (fast) or by going to box (slow)
-    global fcache  #we are going to update it so make it global, key is
-    #fcache contains one dictionary for each unique key_yr_mo, key is location prefix, e.g. "Lisque"
+    if not testing: #none of this is needed if we aren't uploading to box
+        folder_name = folder['name']
+        global fcache  #we are going to update it so make it global, key is
+        #fcache contains one dictionary for each unique key_yr_mo, key is location prefix, e.g. "Lisque"
 
-    cache_key = '{0}_{1}_{2}'.format(key,yr,mo) # one dictionary per month
-    if cache_key not in fcache:
-        #dictionary flist contains name=folder_obj pairs where name is 
-	#day string, folder_obj is box folder once created
-        flist = {} 
-        fcache[cache_key] = flist
-    else: 
-        flist = fcache[cache_key]
-    #regardless of path above, we have a valid flist at this point for this year and month
+        cache_key = '{0}_{1}_{2}'.format(key,yr,mo) # one dictionary per month
+        if cache_key not in fcache:
+            #dictionary flist contains name=folder_obj pairs where name is 
+	    #day string, folder_obj is box folder once created
+            flist = {} 
+            fcache[cache_key] = flist
+        else: 
+            flist = fcache[cache_key]
+        #regardless of path above, we have a valid flist at this point for this year and month
 
-    if dy in flist: #check if dy is a key in the dictionary, if so, get the folder
-	day_folder = flist[dy]
-	day_folder_name = day_folder.get()['name']
-    elif nody in flist:
-        #yr_mo_day is not in the cache for this location 
-	#if yr_mo_0 is (no days created yet), then use it to create dy folder
-	mo_folder = flist['0']
-	day_folder = mo_folder.create_subfolder(dy)
-        flist[dy] = day_folder
-	day_folder_name = day_folder.get()['name']
-    #else, we need to create the year and month folder or just the month folder, 
-    #leaving day_folder None will trigger this lookup
+        if dy in flist: #check if dy is a key in the dictionary, if so, get the folder
+	    day_folder = flist[dy]
+	    day_folder_name = day_folder.get()['name']
+        elif nody in flist:
+            #yr_mo_day is not in the cache for this location 
+	    #if yr_mo_0 is (no days created yet), then use it to create dy folder
+	    mo_folder = flist['0']
+	    day_folder = mo_folder.create_subfolder(dy)
+            flist[dy] = day_folder
+	    day_folder_name = day_folder.get()['name']
+        #else, we need to create the year and month folder or just the month folder, 
+        #leaving day_folder None will trigger this lookup
         
-    if not testing:
         if day_folder is None:
             with timeblock('checkOrCreateFolder_BOX'):
                 #check if there is a directory called yr in the folder, if not make it
@@ -277,6 +279,7 @@ def main():
     parser.add_argument('--debug',action='store',default=False,type=bool,help='Turn debugging on')
     parser.add_argument('--noupload',action='store_true',default=False,help='Turn uploading to box off')
     args = parser.parse_args()
+    testing = args.noupload
 
     #read in the map
     with open(args.map,'r') as map_file:    
@@ -289,8 +292,10 @@ def main():
 	'''
         mymap = json.loads(map_file.read())
 
-    #log into Box
-    auth_client = upload_files.setup()
+    auth_client = None
+    if not testing:
+        #log into Box
+        auth_client = upload_files.setup()
 
     #open the csv file for writing out the metainformation per JPG file
     with open(args.csvfn,'wt') as f:
@@ -310,27 +315,27 @@ def main():
             if DEBUG:
                 print '{0}: {1}: {2}'.format(myfolder_id,prefix,full_prefix)
 
-            #get the box folder object for the parent (camera location) folder
-            try: 
-                folder = auth_client.folder( folder_id=myfolder_id, ).get()
-            except BoxOAuthException as e:
-                print e
-                print 'Unable to open primary folder, retrying auth... '
-                try:
-                    auth_client = upload_files.setup()
+            folder = None
+	    if not testing:
+                #get the box folder object for the parent (camera location) folder
+                try: 
                     folder = auth_client.folder( folder_id=myfolder_id, ).get()
-                except Exception as e:
+                except BoxOAuthException as e:
                     print e
-                    print 'Unable to open primary folder, check your tokens and Box service!'
-                    return
+                    print 'Unable to open primary folder, retrying auth... '
+                    try:
+                        auth_client = upload_files.setup()
+                        folder = auth_client.folder( folder_id=myfolder_id, ).get()
+                    except Exception as e:
+                        print e
+                        print 'Unable to open primary folder, check your tokens and Box service!'
+                        return
+    	    else: 
+                #set last param (testing/printAll) to True if you don't want to write to box 
+	        #but want to see the jpeg info per file (generate the metadata for csv file)
+	        print 'testing is set to True: Not uploading to box. Prefix {0}'.format(prefix)
 
             #process the file or directory, outputing metainformation to the csvfile 
-
-            #set last param (testing/printAll) to True if you don't want to write to box 
-	    #but want to see the jpeg info per file (generate the metadata for csv file)
-            testing = args.noupload
-	    if testing:
-	        print "testing is set to True: Not uploading to box"
             get_exif(args.img,folder,csvFile,auth_client,prefix,full_prefix,pictype,key,testing)
 
 if __name__ == '__main__':
