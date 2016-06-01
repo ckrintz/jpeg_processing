@@ -30,30 +30,22 @@ def get_tokens() :
     return data
 
 #############################
-def get_file(client,fid,fname):
-    ''' not used: doesn't work (or I cannot figure out how it works) for box (search)
-	instead we pass in the folder and search for the filename that way (see runit)
+def get_file(client,fid,fname,start_with=0,num_results=20):
+    ''' given an oauth client, a box folder ID (base), and a filename, search box and return the file object list
     '''
-    print 'get_file: {0}'.format(fname)
     #client.search does not work, returns first file found does not have same fname
     search_results = client.search(
-        fname,
-        limit=100,
-        offset=0,
+        fname, #name prefixes work (returns multiple)
+        limit=num_results,
+        offset=start_with,
         ancestor_folders=[client.folder(folder_id=fid)],
         result_type="file",
         #file_extensions=".JPG", doesn't work (nothing returned)
     )
     if DEBUG: 
 	print 'number of search results {0}'.format(len(search_results))
-    for res in search_results:
-        if DEBUG: 
-            print 'result from search: {0}'.format(res.name)
-        if res.name == fname:
-	    if DEBUG:
-                print 'found search ele: {0}'.format(res.name)
-            return True
-    return False
+
+    return search_results
 
 #############################
 def auth():
