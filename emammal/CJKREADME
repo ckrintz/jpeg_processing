@@ -1,0 +1,57 @@
+WCS
+Deployment.csv
+Camera Deployment ID,Camera Site Name,Actual Longitude,Actual Latitude,Camera Deployment Begin Date,Camera Deployment End Date,Bait  ,Bait Description,Feature,Feature Methodology,Camera ID,Quiet Period Setting,Camera Failure Details,Sensitivity Setting
+L-HTL11-A01A,L-HTL11-A01A,104.11719,32.94284,5/8/2011,6/10/2011,Scent,Carman's Magna-Glan Lure,"Trail, game",,DC-14,0,Camera Functioning,
+
+Camera Deployment ID,Camera Site Name,Actual Longitude,Actual Latitude,Camera Deployment Begin Date,Camera Deployment End Date,Bait  ,Bait Description,Feature,Feature Methodology,Camera ID,Quiet Period Setting,Camera Failure Details,Sensitivity Setting
+L-HTL11-A03B,L-HTL11-A03B,104.12073,32.91585,9/25/2011,10/14/2011,Scent,Carman's Magna-Glan Lure,"Trail, game",,DC-18,0,Camera Functioning,High
+
+=====================
+
+Image.csv
+Deployment ID,Image Sequence ID,Image path,Image ID,Image File Name,Photo Type,Photo Type Identified by,Genus Species,IUCN ID,IUCN Status,Date_Time,Interest Rank,Age,Sex,Individual ID,Count,Animal recognizable,Individual Animal Notes,Digital Origin,Restrictions on Access,Embargo Period,Image Use Restrictions
+L-HTL11-A01A,,L-HTL11-A01A,L-HTL11-A01A-001,L-HTL11-A01A-001.jpg,Staff,WANG Fang,Homo sapiens,3,NE,5/8/11 10:17,None,,Unknown,,,N,,born digital,,,
+
+
+Deployment ID,Image Sequence ID,Image ID,Image File Name,Photo Type,Photo Type Identified by,Genus Species,IUCN ID,IUCN Status,Date_Time,Interest Rank,Age,Sex,Individual ID,Count,Animal recognizable,Individual Animal Notes,Digital Origin,Restrictions on Access,Embargo Period,Image Use Restrictions
+L-HTL11-A03B,,L-HTL11-A03B-005,L-HTL11-A03B-005.JPG,Animal,WANG Fang,Mustela sibirica,41659,LC,5/16/11 13:58,None,,Unknown,,1,N,,born digital,,,
+
+
+=====================
+=====================
+emammal
+
+Deployment.csv
+Camera Deployment ID,Camera Site Name,Camera Deployment Begin Date,Camera Deployment End Date,Actual Latitude,Actual Longitude,Camera Failure Details,Bait  ,Bait Description,Feature,Feature Methodology,Camera ID,Quiet Period Setting,Sensitivity Setting
+COR.c1.548,COR.c1.548,4/15/09,4/20/09,9.154979338,-79.8288558,Camera Functioning,Other Bait,Astrocaryum pulp,Fruiting tree,Astrocaryum pulp - Plots were selected under fruitbearing astrocaryums. Cameras are placed at +- 40 cm above ground with an angle downwards.,11,0,
+
+Image.csv
+Deployment ID,Image Sequence ID,Image ID,Location,Image File Name,Photo Type,Photo Type Identified by,Genus Species,IUCN ID,IUCN Status,Date_Time,Interest Rank,Age,Sex,Individual ID,Count,Animal recognizable,Individual Animal Notes,Digital Origin,Embargo Period,Restrictions on Access,Image Use Restrictions
+COR.c1.548,1,455043,\COR.c1.548\IMG_0001.JPG,IMG_0001.JPG,,,,,,4/15/09 9:40,None,,,,,,,born digital,,,
+...
+COR.c1.548,1,455072,\COR.c1.548\IMG_0030.JPG,IMG_0030.JPG,,,,,,4/15/09 9:41,None,,,,,,,born digital,,,
+COR.c1.548,2,455073,\COR.c1.548\IMG_0032.JPG,IMG_0032.JPG,,,,,,4/15/09 14:46,None,,,,,,,born digital,,,
+COR.c1.548,2,455074,\COR.c1.548\IMG_0033.JPG,IMG_0033.JPG,,,,,,4/15/09 14:46,None,,,,,,,born digital,,,
+COR.c1.548,2,455075,\COR.c1.548\IMG_0034.JPG,IMG_0034.JPG,,,,,,4/15/09 14:46,None,,,,,,,born digital,,,
+COR.c1.548,2,455076,\COR.c1.548\IMG_0035.JPG,IMG_0035.JPG,,,,,,4/15/09 14:46,None,,,,,,,born digital,,,
+COR.c1.548,2,455077,\COR.c1.548\IMG_0036.JPG,IMG_0036.JPG,,,,,,4/15/09 14:46,None,,,,,,,born digital,,,
+COR.c1.548,2,455078,\COR.c1.548\IMG_0037.JPG,IMG_0037.JPG,,,,,,4/15/09 14:46,None,,,,,,,born digital,,,
+COR.c1.548,2,455079,\COR.c1.548\IMG_0038.JPG,IMG_0038.JPG,,,,,,4/15/09 14:46,None,,,,,,,born digital,,,
+COR.c1.548,2,455080,\COR.c1.548\IMG_0039.JPG,IMG_0039.JPG,,,,,,4/15/09 14:46,None,,,,,,,born digital,,,
+COR.c1.548,2,455081,\COR.c1.548\IMG_0040.JPG,IMG_0040.JPG,,,,,,4/15/09 14:46,None,,,,,,,born digital,,,
+COR.c1.548,2,455082,\COR.c1.548\IMG_0041.JPG,IMG_0041.JPG,,,,,,4/15/09 14:46,None,,,,,,,born digital,,,
+COR.c1.548,3,455083,\COR.c1.548\IMG_0042.JPG,IMG_0042.JPG,,,,,,4/15/09 15:46,None,,,,,,,born digital,,,
+
+
+Sequence.csv
+Observation Type,Deployment ID,Image Sequence ID,Date_Time Begin,Date_Time End,Genus species,Species Common Name,Age,Sex,Individual ID,Count,Animal recognizable,Individual Animal Notes,TSN ID,IUCN ID,IUCN Status
+Researcher,COR.c1.548,COR.c1.548-S1,4/15/09 9:40,4/15/09 9:41,Camera Trapper,Camera Trapper,,,,1,,,4,4,NE
+Researcher,COR.c1.548,COR.c1.548-S2,4/15/09 14:46,4/15/09 14:46,Dasyprocta punctata,Central American Agouti,,,,1,,,584734,6277,LC
+Researcher,COR.c1.548,COR.c1.548-S3,4/15/09 15:46,4/15/09 15:46,Dasyprocta punctata,Central American Agouti,,,,1,,,584734,6277,LC
+Researcher,COR.c1.548,COR.c1.548-S4,4/15/09 17:36,4/15/09 17:36,Mazama americana,Red Brocket,,,,1,,,625067,29619,DD
+
+
+
+Project ID,Publish Date,Project Name,Project Objectives,Project Owner,Project Owner Email,Principal Investigator,Principal Investigator Email,Project Contact,Project Contact Email,Project Latitude,Project Longitude,Country Code,Project Data Use and Constraints
+Pana_Palm,,Fruiting Palm Trees,Register the species that feed on the fallen fruits of palm trees,Roland Kays, roland.kays@ncdenr.gov ,"Patrick Jansen, Roland Kays"," , roland.kays@ncdenr.gov ",Roland Kays, roland.kays@ncdenr.gov ,9.1574,-79.8509,PA,
+
