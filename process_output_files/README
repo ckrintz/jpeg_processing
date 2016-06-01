@@ -86,4 +86,5 @@ python process.py --overWrite all.csv
 
 #run the program, appending new data from append.csv
 python process.py append.csv
-python process.py --overWrite all.csv
+
+The process.py program outputs the rows that are returned in the sql query that is performed at the end of main.
