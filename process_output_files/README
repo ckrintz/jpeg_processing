@@ -43,6 +43,10 @@
 		http://www.postgresqltutorial.com/postgresql-data-types/
 
 		- practice your SQL using the psql command line (this will help you debug)
+		psql -U postgres -d wtbdb
+		SELECT count(*) from metainfo;
+		SELECT * from metainfo;     //this will take awhile, hit q to stop scrolling through results when they come
+
 		- all SQL ends in a ;		psql commands do not
 			if you forget this, you get a continuation prompt (single arrow, type ;)
 		- SQL expects quoted text to be in single quotes
