@@ -74,3 +74,16 @@ All programs have a main routine (so that each can be executed/tested directly).
 The program process.py calls the file/library dbiface.py.   All of the db operations are in dbiface.
 
 The complete CSV file is in all.csv.gz.  Gunzip it prior to passing it into process.py
+gunzip all.csv.gz
+
+#make sure that postgres has been started
+pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start
+	#this stops it
+	pg_ctl -D /usr/local/var/postgres stop
+
+#run the program, overwriting the metainfo table in the wtbdb db (hard coded in process.py) with data in all.csv
+python process.py --overWrite all.csv
+
+#run the program, appending new data from append.csv
+python process.py append.csv
+python process.py --overWrite all.csv
