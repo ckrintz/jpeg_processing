@@ -8,7 +8,8 @@ import dbiface
 import upload_files
 
 DEBUG=False
-SEDGWICK='7411611121'
+#SEDGWICK='7411611121'
+SEDGWICK='0'
 
 def main():
     global DEBUG #to allow setting DEBUG flag via command line
@@ -30,30 +31,30 @@ def main():
     #set the name of the file prefix to find/search from
     #fname = 'Blue_2015-04-15_14:34:10_00'
     fname = 'Main_2013-10-13' #350 in dir at 450K each is 161MB
+    #fname = 'Sedgwick Camera' 
 
     #log into box if needed
     auth_client = upload_files.setup()
 
-    #get one file, get its folder, walk folder entries (guaranteed to be on same day) to find series
+    #get one file, get its folder, walk folder entries (all guaranteed to be on same day) to find series
     limit = 1
     jpegs = upload_files.get_files(auth_client,SEDGWICK,fname,0,limit) #returns list unordered, not guaranteed to have prefix
     if len(jpegs) == limit and jpegs[0].name.startswith(fname):
         #help/info from: https://docs.box.com/reference#folder-object-1
-        print 'found a file: {0}'.format(jpegs[0].name)
-        jpeg_parent = jpegs[0].parent['id']
+        jpeg_parent = jpegs[0].parent['id'] #get the box ID for the folder of this file
+        fldr = upload_files.get_folder(auth_client,jpeg_parent) #returns folder object from box (here: parent folder)
 
-	#get the parent folder
-        fldr = upload_files.get_folder(auth_client,jpeg_parent) #returns folder object from box
         item_count = fldr['item_collection']['total_count'] #number of items in the folder total
    	ents = fldr['item_collection']['entries']  #this only contains 100 of the items in the folder max, if total<=100 then use it (not likely for wtb)
         items = fldr.get_items(limit=1000,offset=0) #get all of the items (File objects) in the folder
-        if item_count <= 100:  #use folder metadata to check names, else use folder objects
+        if item_count <= 100:  #use folder metadata to check names, else use folder objects (slower)
 	    items = ents
         count = 0
+        namelist = []
         for ent in items:
-            if type(ent).__name__=='File':  #make sure that item has type boxsdk.object.file.File
+            if type(ent).__name__=='File':  #make sure that item has type boxsdk.object.file.File; it could be a Folder
                 if ent['name'].startswith(fname):
-                    count += 1
+                    namelist.append(ent['name'])
         print count
     else:
 	print 'Error, no files came back for fname:{0}'.format(fname)

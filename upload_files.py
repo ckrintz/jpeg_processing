@@ -46,7 +46,7 @@ def get_files(client,fid,fname,start_with=0,num_results=20):
         limit=num_results,
         offset=start_with,
         ancestor_folders=[client.folder(folder_id=fid)],
-        result_type="file",
+        #result_type="file",  #add this if you only want files, without it, this will return files and folders
         #file_extensions=".JPG", doesn't work (nothing returned)
     )
     if DEBUG: 
