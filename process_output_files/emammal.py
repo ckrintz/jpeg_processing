@@ -56,6 +56,17 @@ def main():
                 if ent['name'].startswith(fname):
                     namelist.append(ent['name'])
         print count
+        first = True
+        last = None
+        for name in sorted(namelist):
+	    if first:
+ 		first = False
+		last = name
+                continue
+	    #Main_2013-10-13_14:20:40_17274.JPG
+	    dts_last
+	    
+		
     else:
 	print 'Error, no files came back for fname:{0}'.format(fname)
         sys.exit(1)
