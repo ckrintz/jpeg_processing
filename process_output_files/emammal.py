@@ -26,8 +26,11 @@ def main():
     dtdict = {}
     DEBUG = args.debug
     first = True
+
+    #set the name of the file prefix to find/search from
     #fname = 'Blue_2015-04-15_14:34:10_00'
     fname = 'Main_2013-10-13' #350 in dir at 450K each is 161MB
+
     #log into box if needed
     auth_client = upload_files.setup()
 
@@ -38,20 +41,23 @@ def main():
         #help/info from: https://docs.box.com/reference#folder-object-1
         print 'found a file: {0}'.format(jpegs[0].name)
         jpeg_parent = jpegs[0].parent['id']
+
+	#get the parent folder
         fldr = upload_files.get_folder(auth_client,jpeg_parent) #returns folder object from box
-        print 'item count: {0}'.format(fldr['item_collection']['total_count'])
-        print 'path: {0}'.format(fldr['path_collection']['entries'])
+        item_count = fldr['item_collection']['total_count'] #number of items in the folder total
+   	ents = fldr['item_collection']['entries']  #this only contains 100 of the items in the folder max, if total<=100 then use it (not likely for wtb)
+        items = fldr.get_items(limit=1000,offset=0) #get all of the items (File objects) in the folder
+        if item_count <= 100:  #use folder metadata to check names, else use folder objects
+	    items = ents
         count = 0
-        bigcount = len(fldr['item_collection']['entries'])
-        for ent in fldr['item_collection']['entries']:
-            print ent
-            if ent['name'].startswith(fname):
-                count += 1
-        print count,bigcount
-        limit = 200
-        jpegs = upload_files.get_files(auth_client,SEDGWICK,fname,0,limit) #returns list unordered, not guaranteed to have prefix
-        count = len(jpegs)
+        for ent in items:
+            if type(ent).__name__=='File':  #make sure that item has type boxsdk.object.file.File
+                if ent['name'].startswith(fname):
+                    count += 1
         print count
+    else:
+	print 'Error, no files came back for fname:{0}'.format(fname)
+        sys.exit(1)
     sys.exit(1)
 
     offset = 0 #starts at 0, max is 200 returned
