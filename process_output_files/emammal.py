@@ -42,10 +42,15 @@ def main():
         print 'item count: {0}'.format(fldr['item_collection']['total_count'])
         print 'path: {0}'.format(fldr['path_collection']['entries'])
         count = 0
+        bigcount = len(fldr['item_collection']['entries'])
         for ent in fldr['item_collection']['entries']:
             print ent
-            if ent.name.startswith(fname):
+            if ent['name'].startswith(fname):
                 count += 1
+        print count,bigcount
+        limit = 200
+        jpegs = upload_files.get_files(auth_client,SEDGWICK,fname,0,limit) #returns list unordered, not guaranteed to have prefix
+        count = len(jpegs)
         print count
     sys.exit(1)
 
