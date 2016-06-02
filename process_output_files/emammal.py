@@ -25,22 +25,55 @@ def main():
     #datetime temp
     dtdict = {}
     DEBUG = args.debug
-    #fname = 'Blue_2015-04-15_14:34:10_00'
-    fname = 'Main_2013-10-13_' #350 at 450K each is 161MB
     first = True
-
+    #fname = 'Blue_2015-04-15_14:34:10_00'
+    fname = 'Main_2013-10-13' #350 in dir at 450K each is 161MB
+    #log into box if needed
     auth_client = upload_files.setup()
+
+    #get one file, get its folder, walk folder entries (guaranteed to be on same day) to find series
+    limit = 1
+    jpegs = upload_files.get_files(auth_client,SEDGWICK,fname,0,limit) #returns list unordered, not guaranteed to have prefix
+    if len(jpegs) == limit and jpegs[0].name.startswith(fname):
+        #help/info from: https://docs.box.com/reference#folder-object-1
+        print 'found a file: {0}'.format(jpegs[0].name)
+        jpeg_parent = jpegs[0].parent['id']
+        fldr = upload_files.get_folder(auth_client,jpeg_parent) #returns folder object from box
+        print 'item count: {0}'.format(fldr['item_collection']['total_count'])
+        print 'path: {0}'.format(fldr['path_collection']['entries'])
+        count = 0
+        for ent in fldr['item_collection']['entries']:
+            print ent
+            if ent.name.startswith(fname):
+                count += 1
+        print count
+    sys.exit(1)
+
     offset = 0 #starts at 0, max is 200 returned
     limit = 200
     mx = 350 #from https://ucsb.app.box.com/files/0/f/7825943021/10 for 10-13
-    jpegs = upload_files.get_file(auth_client,SEDGWICK,fname,offset,limit) #returns list unordered, not guaranteed to have prefix
+    jpegs = upload_files.get_files(auth_client,SEDGWICK,fname,offset,limit) #returns list unordered, not guaranteed to have prefix
     count = len(jpegs)
+    if count == 0:  #try again
+        jpegs = upload_files.get_files(auth_client,SEDGWICK,fname,offset,limit) #returns list unordered, not guaranteed to have prefix
+    count = len(jpegs)
+    print count
+
+    if count == 0: #something bad happened in the call
+	print 'Error, no files came back for fname:{0}'.format(fname)
+        sys.exit(1)
+    for j in jpegs:
+        print j.name
+    jpeg_parent = jpegs[0].parent['id']
+    fldr = upload_files.get_folder(auth_client,jpeg_parent) #returns folder object from box
+    #get the number of entries in the folder containing this file
+    print fldr['item_collection']['total_count']
     
     print 'mx: {0} count: {1}'.format(mx,count)
     while count < mx: #should we be setting limit here to be the difference of max and limit?
         offset = offset+limit
         print '\t looping offset: {0} limit: {1}'.format(offset,limit)
-        newjpegs = upload_files.get_file(auth_client,SEDGWICK,fname,offset,limit) #returns list unordered, not guaranteed to have prefix
+        newjpegs = upload_files.get_files(auth_client,SEDGWICK,fname,offset,limit) #returns list unordered, not guaranteed to have prefix
 	count = count + len(newjpegs)
         jpegs = jpegs + newjpegs
     print 'mx: {0} count: {1}'.format(mx,count)
