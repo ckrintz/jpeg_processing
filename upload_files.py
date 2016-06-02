@@ -30,8 +30,15 @@ def get_tokens() :
     return data
 
 #############################
-def get_file(client,fid,fname,start_with=0,num_results=20):
+def get_folder(client,fid):    
+    folder = client.folder( folder_id=fid, ).get()
+    return folder
+
+#############################
+def get_files(client,fid,fname,start_with=0,num_results=20):
     ''' given an oauth client, a box folder ID (base), and a filename, search box and return the file object list
+        returns list unordered, not guaranteed to have fname in it, sometimes returns nothing
+	- not very useful; requires tons of error handling/checking
     '''
     #client.search does not work, returns first file found does not have same fname
     search_results = client.search(
@@ -111,9 +118,10 @@ def runit(mydir,folder,client,newFName=None):
 
     #get the list of filenames already in the folder dictionary
     processed_list = ''
-    respobj = folder.__dict__['_response_object']
-    items = respobj['item_collection']
-    entries = items['entries']
+    entries = folder['response_object']['entries']
+    #respobj = folder.__dict__['_response_object']
+    #items = respobj['item_collection']
+    #entries = items['entries']
     for ent in entries:
         n = ent['name']
         processed_list += '{0};'.format(n)
@@ -202,9 +210,9 @@ def main():
 
     #log into Box
     cli = setup()
-    folder = cli.folder( folder_id=args.folder_id, ).get()
+    folder = get_folder(cli,args.folder_id)
     if DEBUG:
-        root_folder = cli.folder(folder_id='0').get()
+        root_folder = get_folder(cli,'0')
         print 'folder owner: ' + root_folder.owned_by['login']
         print 'folder name: ' + root_folder['name']
         items = cli.folder(folder_id='0').get_items(limit=100, offset=0)
