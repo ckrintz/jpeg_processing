@@ -8,8 +8,8 @@ import dbiface
 import upload_files
 
 DEBUG=False
-#SEDGWICK='7411611121'
-SEDGWICK='0'
+SEDGWICK='7411611121'
+#SEDGWICK='0'
 
 def main():
     global DEBUG #to allow setting DEBUG flag via command line
@@ -35,6 +35,8 @@ def main():
 
     #log into box if needed
     auth_client = upload_files.setup()
+    series = {}
+    namelist = []
 
     #get one file, get its folder, walk folder entries (all guaranteed to be on same day) to find series
     limit = 1
@@ -50,7 +52,6 @@ def main():
         if item_count <= 100:  #use folder metadata to check names, else use folder objects (slower)
 	    items = ents
         count = 0
-        namelist = []
         for ent in items:
             if type(ent).__name__=='File':  #make sure that item has type boxsdk.object.file.File; it could be a Folder
                 if ent['name'].startswith(fname):
@@ -60,16 +61,39 @@ def main():
         last = None
         for name in sorted(namelist):
 	    if first:
+                series[name] = 0
  		first = False
 		last = name
                 continue
 	    #Main_2013-10-13_14:20:40_17274.JPG
-	    dts_last
-	    
-		
+  	    #parse the last name (date time string)
+	    lastsplit  = last.split('_')
+            ts = lastsplit[1] + " " + lastsplit[2]
+            lastdt = datetime.strptime( ts, '%Y-%m-%d %H:%M:%S')
+
+  	    #parse the current name (date time string)
+	    thissplit = name.split('_')
+            ts = thissplit[1] + " " + thissplit[2]
+            thisdt = datetime.strptime( ts, '%Y-%m-%d %H:%M:%S')
+
+	    #take the difference
+	    td = thisdt - lastdt
+	    secs_diff = td.total_seconds()
+
+	    #if secs_diff is <= 60 then name is part of the series in which last is in
+	    if secs_diff <= 60:
+		series[name] = series[last]
+	    else: 
+		series[name] = series[last]+1
+
+	    #now swap in this names info for last for the next iteration and iterate
+	    last = name
     else:
 	print 'Error, no files came back for fname:{0}'.format(fname)
         sys.exit(1)
+
+    for name in sorted(namelist):
+	print '{0} {1}'.format(name,series[name])
     sys.exit(1)
 
     offset = 0 #starts at 0, max is 200 returned
