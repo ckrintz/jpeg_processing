@@ -13,15 +13,13 @@ def main():
     parser = argparse.ArgumentParser(description='CSV File Processing')
     #required arguments
     parser.add_argument('fname',action='store',help='CSV file (must have header row) to import into DB')
+    parser.add_argument('outfname',action='store',help='text file to output for plotting')
     #optional arguments
     parser.add_argument('--overWrite',action='store_true',default=False,help='overwrite entire db table with data in this CSV (default is to append, skipping keys that exists (date,time,ID))')
     parser.add_argument('--debug',action='store_true',default=False,help='Turn debugging on')
     args = parser.parse_args()
 
-    #datetime temp
-    dtdict = {}
     DEBUG = args.debug
-
     dbname = 'wtbdb'
     tname = 'metainfo'
 
@@ -51,20 +49,22 @@ def main():
     
     db.importCSV(args.fname,tname,args.overWrite)
 
-    #read what is in the db after the import - use single quotes nested in outer double quotes
-    #because SQL requires single
-    sql = "SELECT * FROM {0} WHERE dt > '2015-11-08';".format(tname)
-    #other examples to try:
-    #sql = "SELECT * FROM {0} WHERE dt > '2015-01-01' AND dt < '2015-05-23';".format(tname)
-    #sql = "SELECT * FROM {0} WHERE dt > '2015-01-01' AND dt < now();".format(tname)
-    #sql = "SELECT * FROM {0} WHERE dt BETWEEN '2015-01-01' AND dt < now();".format(tname)
-    #sql = "SELECT count(*) FROM {0} WHERE dt > '2015-01-01' AND dt < '2015-05-23';".format(tname)
-    cur = db.execute_sql(sql)
-    rows = cur.fetchall()
-    for row in rows:
-        print row
+    if DEBUG: 
+        print 'After:'
+        #read what is in the db after the import - use single quotes nested in outer double quotes
+        #because SQL requires single
+        sql = "SELECT * FROM {0} WHERE dt > '2015-11-08';".format(tname)
+        #other examples to try:
+        #sql = "SELECT * FROM {0} WHERE dt > '2015-01-01' AND dt < '2015-05-23';".format(tname)
+        #sql = "SELECT * FROM {0} WHERE dt > '2015-01-01' AND dt < now();".format(tname)
+        #sql = "SELECT * FROM {0} WHERE dt BETWEEN '2015-01-01' AND dt < now();".format(tname)
+        #sql = "SELECT count(*) FROM {0} WHERE dt > '2015-01-01' AND dt < '2015-05-23';".format(tname)
+        cur = db.execute_sql(sql)
+        rows = cur.fetchall()
+        for row in rows:
+            print row
+
     db.closeConnection()
-    
 
 if __name__ == '__main__':
     main()
