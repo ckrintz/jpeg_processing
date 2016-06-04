@@ -1,0 +1,7 @@
+ISO Code for US: 840
+
+Code for date time "Date_Time Captured"
+=IF(AND(ISBLANK(A2),ISBLANK(B2)),"NONE",IF(ISBLANK(A2),"NONE"&" "&TEXT(B2,"hh:mm:ss"),TEXT(A2,"yyyy/mm/dd")&" "&IF(ISBLANK(B2),"NONE",TEXT(B2,"hh:mm:ss"))))
+Col 1: Date  YYYY/MM/DD
+Col 2: Time  HH:MM:SS
+Col 3: Date_Time Captured
