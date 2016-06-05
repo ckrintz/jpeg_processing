@@ -35,6 +35,11 @@ def get_folder(client,fid):
     return folder
 
 #############################
+def get_file(client,fid):    
+    f = client.file( file_id=fid, ).get()
+    return f
+
+#############################
 def get_files(client,fid,fname,start_with=0,num_results=20):
     ''' given an oauth client, a box folder ID (base), and a filename, search box and return the file object list
         returns list unordered, not guaranteed to have fname in it, sometimes returns nothing
@@ -126,9 +131,6 @@ def runit(mydir,folder,client,newFName=None):
         n = ent['name']
         processed_list += '{0};'.format(n)
 
-    #if DEBUG:
-       #print 'processed list:\n\t{0}'.format(processed_list)
-                
     if newFName is not None: #process the file passed in via newFName arg
 	#mydir arg in this case holds the full local path and fname
 	#newFName is the shortened fname to use on the remote end
