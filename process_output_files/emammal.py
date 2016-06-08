@@ -43,12 +43,12 @@ def generate_emammal_Image(deployID,seqID,iID,path,tss,writeHeader=False):
             csvFile.writerow(('Deployment ID','Image Sequence ID','Image ID','Location','Image File Name','Photo Type', 'Photo Type Identified by','Genus Species','IUCN ID','IUCN Status','Date_Time','Interest Rank','Age','Sex','Individual ID','Count','Animal recognizable','Individual Animal Notes','Digital Origin','Embargo Period','Restrictions on Access','Image Use Restrictions'))
             #csvFile.writerow((deployID,seqID,iID,path,'Animal','','Unknown Animal','2',tss,'','','','','','','',''))
             #csvFile.writerow((deployID,seqID,iID,path,iID,'','','','2','NE',tss,'','','','','','','','born digital','','',''))
-            csvFile.writerow((deployID,seqID,iID,path,iID,'','','','','',tss,'','','','','','','','born digital','','',''))
+            csvFile.writerow((deployID,seqID,iID,path,iID,'','','','','',tss,'None','','','','','','','born digital','','',''))
     else:
         with open('Image.csv','at') as f: 
             csvFile = csv.writer(f)
             #csvFile.writerow((deployID,seqID,iID,path,iID,'','','','2','NE',tss,'','','','','','','','born digital','','',''))
-            csvFile.writerow((deployID,seqID,iID,path,iID,'','','','','',tss,'','','','','','','','born digital','','',''))
+            csvFile.writerow((deployID,seqID,iID,path,iID,'','','','','',tss,'None','','','','','','','born digital','','',''))
 
 def generate_emammal_Sequence(deployID,seqID,tss_start,tss_end,writeHeader=False):
     '''tss_start and tss_end are string datetime format: YYYY/MM/DD HH/mm/ss'''
@@ -196,10 +196,11 @@ def main():
 	    #file name format: Main_2013-10-13_14:20:40_17274.JPG
 
 	    if first:
-                series[name] = seqPrefix + '0'
+                series[name] = seqPrefix + '1' #start series counter at 1 per emammal 6/8/16
 	        thissplit = name.split('_')
                 ts = thissplit[1] + " " + thissplit[2]
                 first_in_series_tss = ts.replace('-','/') #used when series/sequence ends as tss_start
+                last_in_series_tss = first_in_series_tss #used when there's only one image and one series/sequence
  		first = False
 		last = name
                 continue
@@ -223,13 +224,17 @@ def main():
 	    if secs_diff <= 60:
 		series[name] = series[last]
 	    else: 
-                seqID = series[last] #get ID of previous sequence
-                #write sequence metainfo to the Sequence CSV
-                generate_emammal_Sequence(deployID,seqID,first_in_series_tss,last_in_series_tss,writeSequenceHeader)
-		if writeSequenceHeader:
-                    writeSequenceHeader = False
+                #new Sequence -- write sequence metainfo to the Sequence CSV for the previous Sequence that just ended
+                seqID = series[last] #get ID of previous sequence (that is ending)
                 tmp = series[last].split('_')
                 seriesCounter = int(tmp[len(tmp)-1])
+		#use integer for Sequence ID not string per emammal 6/8/16
+                #generate_emammal_Sequence(deployID,seqID,first_in_series_tss,last_in_series_tss,writeSequenceHeader)
+                generate_emammal_Sequence(deployID,seriesCounter,first_in_series_tss,last_in_series_tss,writeSequenceHeader)
+		if writeSequenceHeader:
+                    writeSequenceHeader = False
+
+		#update this image with the new Sequence ID
 		series[name] = seqPrefix + '{0}'.format(seriesCounter+1) #set the new sequence ID
                 first_in_series_tss = ts.replace('-','/') #used when series/sequence ends as tss_start
 
@@ -237,10 +242,14 @@ def main():
 	    last = name
 
         if last: 
-            #write the last series out (above writes are triggered on series change, there is none for last series)
-            seqID = series[last] #get ID of previous sequence
+            #write the last Sequence out (above writes are triggered on series change, there is none for last series)
+            seqID = series[name] #get ID of this sequence
+            #use integer for Sequence ID not string per emammal 6/8/16
+            tmp = series[name].split('_')
+            seriesCounter = int(tmp[len(tmp)-1])
             #write sequence metainfo to the Sequence CSV
-            generate_emammal_Sequence(deployID,seqID,first_in_series_tss,last_in_series_tss,writeSequenceHeader)
+            #generate_emammal_Sequence(deployID,seqID,first_in_series_tss,last_in_series_tss,writeSequenceHeader)
+            generate_emammal_Sequence(deployID,seriesCounter,first_in_series_tss,last_in_series_tss,writeSequenceHeader)
     else:
 	print 'Error, no files came back for fname:{0}'.format(fname)
         sys.exit(1)
@@ -253,8 +262,12 @@ def main():
   	#parse the current name (date time string)
 	thissplit = name.split('_')
         ts = thissplit[1] + " " + thissplit[2]
+
+        #use integer for Sequence ID not string per emammal 6/8/16
+        tmp = series[name].split('_')
+        seriesCounter = int(tmp[len(tmp)-1])
         #write file metainfo to the Image CSV
-        generate_emammal_Image(deployID,series[name],name,ids[name],ts,writeImageHeader) #use box ID for location in box
+        generate_emammal_Image(deployID,seriesCounter,name,ids[name],ts,writeImageHeader) #use box ID for location in box
 	if writeImageHeader:
             writeImageHeader = False
         
