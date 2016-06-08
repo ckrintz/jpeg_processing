@@ -23,7 +23,7 @@ def generate_emammal_Deployment(deployID): #only called once
         csvFile = csv.writer(f)
         #csvFile.writerow((deployID,'Longitude Resolution','Latitude Resolution','Camera Deployment Begin Date','Camera Deployment End Date','Bait Type','Bait Description','Feature Type','Feature Type methodology','Camera Id','Quiet Period Setting (in seconds)','Restriction on Access (Yes/No only)','Camera Failure Details','','','',''))
         csvFile.writerow(('Camera Deployment ID','Camera Site Name','Camera Deployment Begin Date','Camera Deployment End Date','Actual Latitude','Actual Longitude','Camera Failure Details','Bait  ','Bait Description','Feature','Feature Methodology','Camera ID','Quiet Period Setting','Sensitivity Setting'))
-        csvFile.writerow(('Main_Reconyx_001','Main Road Water Hole','2013/07/13 15:30:00','2013/10/13 22:45:32','34.71995','-120.0363','Camera Functioning','No bait','','Water source/spring','water hole','Reconyx_001','0',''))
+        csvFile.writerow(('Main_Reconyx_001','Main Road Water Hole','2013/07/13 15:30:00','2013/10/13 22:45:32','34.71995','-120.0363','Camera Functioning','No Bait','','Water source/Spring','water hole','Reconyx_001','0',''))
 	#Deployment ID: Main_Reconyx_001 must match in Images.csv
 
 def generate_emammal_Project(projID,projName,start_date_string):
@@ -31,7 +31,8 @@ def generate_emammal_Project(projID,projName,start_date_string):
         csvFile = csv.writer(f)
         #csvFile.writerow(('Project Id','Publish Date','Project Name','Project Objectives','Project Owner (organization or individual)','Project Owner Email (if applicable)','Principal Investigator','Principal Investigator Email','Project Contact','Project Contact Email','Country Code','Project Data Use and Constraints','','',''))
         csvFile.writerow(('Project ID','Publish Date','Project Name','Project Objectives','Project Owner','Project Owner Email','Principal Investigator','Principal Investigator Email','Project Contact','Project Contact Email','Project Latitude','Project Longitude','Country Code','Project Data Use and Constraints'))
-        csvFile.writerow((projID,start_date_string,projName,'Camera trap survey','Sedgwick Reserve','sedgwick@lifesci.ucsb.edu','Chandra Krintz','ckrintz@cs.ucsb.edu','Chandra Krintz','ckrintz@cs.ucsb.edu','34.6928059','-120.0406417','USA','No constraints'))
+        #csvFile.writerow((projID,start_date_string,projName,'Camera trap survey','Sedgwick Reserve','sedgwick@lifesci.ucsb.edu','Chandra Krintz','ckrintz@cs.ucsb.edu','Chandra Krintz','ckrintz@cs.ucsb.edu','34.6928059','-120.0406417','USA','No constraints'))
+        csvFile.writerow((projID,start_date_string,projName,'Camera trap survey','Sedgwick Reserve','sedgwick@lifesci.ucsb.edu','Chandra Krintz','ckrintz@cs.ucsb.edu','Chandra Krintz','ckrintz@cs.ucsb.edu','34.6928059','-120.0406417','USA','NE'))
 
 def generate_emammal_Image(deployID,seqID,iID,path,tss,writeHeader=False):
     #called once for each image
@@ -41,10 +42,12 @@ def generate_emammal_Image(deployID,seqID,iID,path,tss,writeHeader=False):
             #csvFile.writerow(('Deployment ID','Sequence ID','Image Id','Location','Photo Type','Photo Type Identified by','Genus Species','IUCN Identification Number','Date_Time Captured', 'Age', 'Sex', 'Individual ID','Count','Animal recognizable (Y/N, blank)','individual Animal notes','',''))
             csvFile.writerow(('Deployment ID','Image Sequence ID','Image ID','Location','Image File Name','Photo Type', 'Photo Type Identified by','Genus Species','IUCN ID','IUCN Status','Date_Time','Interest Rank','Age','Sex','Individual ID','Count','Animal recognizable','Individual Animal Notes','Digital Origin','Embargo Period','Restrictions on Access','Image Use Restrictions'))
             #csvFile.writerow((deployID,seqID,iID,path,'Animal','','Unknown Animal','2',tss,'','','','','','','',''))
+            #csvFile.writerow((deployID,seqID,iID,path,iID,'','','','2','NE',tss,'','','','','','','','born digital','','',''))
             csvFile.writerow((deployID,seqID,iID,path,iID,'','','','','',tss,'','','','','','','','born digital','','',''))
     else:
         with open('Image.csv','at') as f: 
             csvFile = csv.writer(f)
+            #csvFile.writerow((deployID,seqID,iID,path,iID,'','','','2','NE',tss,'','','','','','','','born digital','','',''))
             csvFile.writerow((deployID,seqID,iID,path,iID,'','','','','',tss,'','','','','','','','born digital','','',''))
 
 def generate_emammal_Sequence(deployID,seqID,tss_start,tss_end,writeHeader=False):
@@ -57,11 +60,11 @@ def generate_emammal_Sequence(deployID,seqID,tss_start,tss_end,writeHeader=False
             csvFile = csv.writer(f)
             #csvFile.writerow(('Observation Type','Deployment ID','Image Sequence ID','Begin Sequence Date Time','End Sequence Date Time','Species Name','Species Common Name','Age','Sex','Individual ID','Count','Animal recognizable (Y/N)','Individual Animal Notes','TSN ID','IUCN ID','',''))
             csvFile.writerow(('Observation Type','Deployment ID','Image Sequence ID','Date_Time Begin','Date_Time End','Genus species','Species Common Name','Age','Sex','Individual ID','Count','Animal recognizable','Individual Animal Notes','TSN ID','IUCN ID','IUCN Status'))
-            csvFile.writerow(('Volunteer',deployID,seqID,tss_start,tss_end,'','','','','','','','','','',''))
+            csvFile.writerow(('Volunteer',deployID,seqID,tss_start,tss_end,'Unknown Animal','Unknown Animal','','','','','','','2','2','NE'))
     else:
         with open('Sequence.csv','at') as f: 
             csvFile = csv.writer(f)
-            csvFile.writerow(('Volunteer',deployID,seqID,tss_start,tss_end,'','','','','','','','','','',''))
+            csvFile.writerow(('Volunteer',deployID,seqID,tss_start,tss_end,'Unknown Animal','Unknown Animal','','','','','','','2','2','NE'))
 
 ############## END generate eMammal CSVs -- see ../emammal/CJKREADME for sample ################
 
