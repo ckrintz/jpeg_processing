@@ -146,11 +146,14 @@ def main():
         print 'Error, uploadOnly must be set with all three s3 arguments for upload to be performed'
         sys.exit(1)
 
-    #set the name of the file prefix to find/search from
+    #set the name of the file prefix to find/search from, tests:
     #fname = 'Blue_2015-04-15_14:34:10_00'
-    fname = 'Main_2013-10-13_02' #30 in dir at 450K each is 7.3MB
     #fname = 'Sedgwick Camera' 
     #fname = 'Main_2013-10-13' #350 in dir at 450K each is 161MB
+
+    #emammal requests each deployment be for a single month in a year.  July (07) 2013 is the first/test
+    deployment_string = '2013-07'
+    fname = 'Main_{0}-'.format(deployment_string) #32260 in dir at 450K each is 14.9GB - 24hrs at 22/min
 
     #log into box if needed
     auth_client = upload_files.setup()
@@ -160,8 +163,8 @@ def main():
 
     #generate deployment and project csv (this overwrites Deployment.csv and Project.csv
     #separate name sections with underscore (so use dashes within name sections)
-    deployID = 'Main-Reconyx-001' #The same for Deployment.csv, Sequence.csv, and Image.csv, use dashes
-    projPrefix = 'Sedgwick-Test1' #The same for Deployment.csv, Sequence.csv, and Image.csv, use dashes
+    deployID = 'Main-Reconyx-001_{0}'.deployment_string) #The same for Deployment.csv, Sequence.csv, and Image.csv, use dashes
+    projPrefix = 'Sedgwick' #The same for Deployment.csv, Sequence.csv, and Image.csv, use dashes
     seqPrefix = projPrefix + '_' + deployID + '_'  # seq IDs must be unique within project, append unique counter to this prefix
     #write deployment metainfo to the Deployment CSV
     generate_emammal_Deployment(deployID)
