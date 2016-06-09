@@ -23,7 +23,7 @@ def generate_emammal_Deployment(deployID): #only called once
         csvFile = csv.writer(f)
         #csvFile.writerow((deployID,'Longitude Resolution','Latitude Resolution','Camera Deployment Begin Date','Camera Deployment End Date','Bait Type','Bait Description','Feature Type','Feature Type methodology','Camera Id','Quiet Period Setting (in seconds)','Restriction on Access (Yes/No only)','Camera Failure Details','','','',''))
         csvFile.writerow(('Camera Deployment ID','Camera Site Name','Camera Deployment Begin Date','Camera Deployment End Date','Actual Latitude','Actual Longitude','Camera Failure Details','Bait  ','Bait Description','Feature','Feature Methodology','Camera ID','Quiet Period Setting','Sensitivity Setting'))
-        csvFile.writerow(('Main_Reconyx_001','Main Road Water Hole','2013/07/13 15:30:00','2013/10/13 22:45:32','34.71995','-120.0363','Camera Functioning','No Bait','','Water source/Spring','water hole','Reconyx_001','0',''))
+        csvFile.writerow((deployID,'Main Road Water Hole','2013/07/13 15:30:00','2013/10/13 22:45:32','34.71995','-120.0363','Camera Functioning','No Bait','','Water source/Spring','water hole','Reconyx_001','0',''))
 	#Deployment ID: Main_Reconyx_001 must match in Images.csv
 
 def generate_emammal_Project(projID,projName,start_date_string):
@@ -154,6 +154,9 @@ def main():
     #emammal requests each deployment be for a single month in a year.  July (07) 2013 is the first/test
     deployment_string = '2013-07'
     fname = 'Main_{0}-'.format(deployment_string) #32260 in dir at 450K each is 14.9GB - 24hrs at 22/min
+    #mammal test:
+    deployment_string = '2013-10'
+    fname = 'Main_2013-10-13' #350 in dir at 450K each is 161MB
 
     #log into box if needed
     auth_client = upload_files.setup()
@@ -163,7 +166,7 @@ def main():
 
     #generate deployment and project csv (this overwrites Deployment.csv and Project.csv
     #separate name sections with underscore (so use dashes within name sections)
-    deployID = 'Main-Reconyx-001_{0}'.deployment_string) #The same for Deployment.csv, Sequence.csv, and Image.csv, use dashes
+    deployID = 'Main-Reconyx-001_{0}'.format(deployment_string) #The same for Deployment.csv, Sequence.csv, and Image.csv, use dashes
     projPrefix = 'Sedgwick' #The same for Deployment.csv, Sequence.csv, and Image.csv, use dashes
     seqPrefix = projPrefix + '_' + deployID + '_'  # seq IDs must be unique within project, append unique counter to this prefix
     #write deployment metainfo to the Deployment CSV
