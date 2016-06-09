@@ -151,12 +151,12 @@ def main():
     #fname = 'Sedgwick Camera' 
     #fname = 'Main_2013-10-13' #350 in dir at 450K each is 161MB
 
-    #emammal requests each deployment be for a single month in a year.  July (07) 2013 is the first/test
+    #emammal requests each deployment be for a single month in a year.  July (07) 2013 is the first large test:
     deployment_string = '2013-07'
     fname = 'Main_{0}-'.format(deployment_string) #32260 in dir at 450K each is 14.9GB - 24hrs at 22/min
-    #mammal test:
-    deployment_string = '2013-10'
-    fname = 'Main_2013-10-13_02' #350 in dir at 450K each is 161MB
+    #emammal small test:
+    #deployment_string = '2013-10'
+    #fname = 'Main_2013-10-13_02' #350 in dir at 450K each is 161MB
 
     #log into box if needed
     auth_client = upload_files.setup()
