@@ -21,17 +21,13 @@ SEDGWICK='7411611121' #Shared Sedgwick Images Folder
 def generate_emammal_Deployment(deployID): #only called once
     with open('Deployment.csv','wt') as f:
         csvFile = csv.writer(f)
-        #csvFile.writerow((deployID,'Longitude Resolution','Latitude Resolution','Camera Deployment Begin Date','Camera Deployment End Date','Bait Type','Bait Description','Feature Type','Feature Type methodology','Camera Id','Quiet Period Setting (in seconds)','Restriction on Access (Yes/No only)','Camera Failure Details','','','',''))
         csvFile.writerow(('Camera Deployment ID','Camera Site Name','Camera Deployment Begin Date','Camera Deployment End Date','Actual Latitude','Actual Longitude','Camera Failure Details','Bait  ','Bait Description','Feature','Feature Methodology','Camera ID','Quiet Period Setting','Sensitivity Setting'))
         csvFile.writerow((deployID,'Main Road Water Hole','2013/07/13 15:30:00','2013/10/13 22:45:32','34.71995','-120.0363','Camera Functioning','No Bait','','Water source/Spring','water hole','Reconyx_001','0',''))
-	#Deployment ID: Main_Reconyx_001 must match in Images.csv
 
 def generate_emammal_Project(projID,projName,start_date_string):
     with open('Project.csv','wt') as f: #only called once
         csvFile = csv.writer(f)
-        #csvFile.writerow(('Project Id','Publish Date','Project Name','Project Objectives','Project Owner (organization or individual)','Project Owner Email (if applicable)','Principal Investigator','Principal Investigator Email','Project Contact','Project Contact Email','Country Code','Project Data Use and Constraints','','',''))
         csvFile.writerow(('Project ID','Publish Date','Project Name','Project Objectives','Project Owner','Project Owner Email','Principal Investigator','Principal Investigator Email','Project Contact','Project Contact Email','Project Latitude','Project Longitude','Country Code','Project Data Use and Constraints'))
-        #csvFile.writerow((projID,start_date_string,projName,'Camera trap survey','Sedgwick Reserve','sedgwick@lifesci.ucsb.edu','Chandra Krintz','ckrintz@cs.ucsb.edu','Chandra Krintz','ckrintz@cs.ucsb.edu','34.6928059','-120.0406417','USA','No constraints'))
         csvFile.writerow((projID,start_date_string,projName,'Camera trap survey','Sedgwick Reserve','sedgwick@lifesci.ucsb.edu','Chandra Krintz','ckrintz@cs.ucsb.edu','Chandra Krintz','ckrintz@cs.ucsb.edu','34.6928059','-120.0406417','USA','NE'))
 
 def generate_emammal_Image(deployID,seqID,iID,path,tss,writeHeader=False):
@@ -39,15 +35,11 @@ def generate_emammal_Image(deployID,seqID,iID,path,tss,writeHeader=False):
     if writeHeader:
         with open('Image.csv','wt') as f: 
             csvFile = csv.writer(f)
-            #csvFile.writerow(('Deployment ID','Sequence ID','Image Id','Location','Photo Type','Photo Type Identified by','Genus Species','IUCN Identification Number','Date_Time Captured', 'Age', 'Sex', 'Individual ID','Count','Animal recognizable (Y/N, blank)','individual Animal notes','',''))
             csvFile.writerow(('Deployment ID','Image Sequence ID','Image ID','Location','Image File Name','Photo Type', 'Photo Type Identified by','Genus Species','IUCN ID','IUCN Status','Date_Time','Interest Rank','Age','Sex','Individual ID','Count','Animal recognizable','Individual Animal Notes','Digital Origin','Embargo Period','Restrictions on Access','Image Use Restrictions'))
-            #csvFile.writerow((deployID,seqID,iID,path,'Animal','','Unknown Animal','2',tss,'','','','','','','',''))
-            #csvFile.writerow((deployID,seqID,iID,path,iID,'','','','2','NE',tss,'','','','','','','','born digital','','',''))
             csvFile.writerow((deployID,seqID,iID,path,iID,'','','','','',tss,'None','','','','','','','born digital','','',''))
     else:
         with open('Image.csv','at') as f: 
             csvFile = csv.writer(f)
-            #csvFile.writerow((deployID,seqID,iID,path,iID,'','','','2','NE',tss,'','','','','','','','born digital','','',''))
             csvFile.writerow((deployID,seqID,iID,path,iID,'','','','','',tss,'None','','','','','','','born digital','','',''))
 
 def generate_emammal_Sequence(deployID,seqID,tss_start,tss_end,writeHeader=False):
@@ -58,7 +50,6 @@ def generate_emammal_Sequence(deployID,seqID,tss_start,tss_end,writeHeader=False
     if writeHeader:
         with open('Sequence.csv','wt') as f: 
             csvFile = csv.writer(f)
-            #csvFile.writerow(('Observation Type','Deployment ID','Image Sequence ID','Begin Sequence Date Time','End Sequence Date Time','Species Name','Species Common Name','Age','Sex','Individual ID','Count','Animal recognizable (Y/N)','Individual Animal Notes','TSN ID','IUCN ID','',''))
             csvFile.writerow(('Observation Type','Deployment ID','Image Sequence ID','Date_Time Begin','Date_Time End','Genus species','Species Common Name','Age','Sex','Individual ID','Count','Animal recognizable','Individual Animal Notes','TSN ID','IUCN ID','IUCN Status'))
             csvFile.writerow(('Volunteer',deployID,seqID,tss_start,tss_end,'Unknown Animal','Unknown Animal','','','','','','','2','2','NE'))
     else:
@@ -185,16 +176,19 @@ def main():
         fldr = upload_files.get_folder(auth_client,jpeg_parent) #returns folder object from box (here: parent folder)
 
         item_count = fldr['item_collection']['total_count'] #number of items in the folder total
-   	ents = fldr['item_collection']['entries']  #this only contains 100 of the items in the folder max, if total<=100 then use it (not likely for wtb)
+	#the following only contains 100 items max in folder, if total files <=100 then use it
+   	#ents = fldr['item_collection']['entries']  #not using this optimization b/c most directories have >100 files
+
+        #loop through files in the directory 1000 at a time 
         items = fldr.get_items(limit=1000,offset=0) #get all of the items (File objects) in the folder
-        if item_count <= 100:  #use folder metadata to check names, else use folder objects (slower)
-	    items = ents
-        for ent in items:
-            if type(ent).__name__=='File':  #make sure that item has type boxsdk.object.file.File; it could be a Folder
-                if ent['name'].startswith(fname):
-                    namelist.append(ent['name'])
-		    ids[ent['name']] = ent['id']
-                    #entFileObj = upload_files.get_file(auth_client,ent['id']) #get the Box File object from the entity ID
+        done = False
+        while not done:
+            for ent in items:
+                    if type(ent).__name__=='File':  #make sure that item has type boxsdk.object.file.File; it could be a Folder
+                    if ent['name'].startswith(fname):
+                        namelist.append(ent['name'])
+		        ids[ent['name']] = ent['id']
+
         first = True
         last = None
         for name in sorted(namelist):
@@ -253,9 +247,10 @@ def main():
             #use integer for Sequence ID not string per emammal 6/8/16
             tmp = series[name].split('_')
             seriesCounter = int(tmp[len(tmp)-1])
-            #write sequence metainfo to the Sequence CSV
-            #generate_emammal_Sequence(deployID,seqID,first_in_series_tss,last_in_series_tss,writeSequenceHeader)
-            generate_emammal_Sequence(deployID,seriesCounter,first_in_series_tss,last_in_series_tss,writeSequenceHeader)
+            #write sequence metainfo to the Sequence CSV (seriesCounter below was seqID before update)
+            generate_emammal_Sequence(deployID,seriesCounter,
+                first_in_series_tss,last_in_series_tss,
+                writeSequenceHeader)
     else:
 	print 'Error, no files came back for fname:{0}'.format(fname)
         sys.exit(1)
