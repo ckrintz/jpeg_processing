@@ -142,12 +142,17 @@ def main():
     #fname = 'Sedgwick Camera' 
     #fname = 'Main_2013-10-13' #350 in dir at 450K each is 161MB
 
+    '''This code assumes we are processing one month maximum (less works) and produces csvs accordingly'''
     #emammal requests each deployment be for a single month in a year.  July (07) 2013 is the first large test:
+
+    #use this to test: deployment_string = '2013-07-15'
     deployment_string = '2013-07'
-    fname = 'Main_{0}-'.format(deployment_string) #32260 in dir at 450K each is 14.9GB - 24hrs at 22/min
+    fname = 'Main_{0}'.format(deployment_string) #32260 in dir at 450K each is 14.9GB - 24hrs at 22/min
     #emammal small test:
     #deployment_string = '2013-10'
     #fname = 'Main_2013-10-13_02' #350 in dir at 450K each is 161MB
+    if DEBUG:
+        print 'searching for prefix: {0}'.format(fname)
 
     #log into box if needed
     auth_client = upload_files.setup()
@@ -167,30 +172,71 @@ def main():
     writeSequenceHeader = True  #write out header the first time only
     writeImageHeader = True  #write out header the first time only
 
-    #get one file, get its folder, walk folder entries (all guaranteed to be on same day) to find series
+    #the following returns and unordered list, not guaranteed that all entries returned have the prefix
+    #get one file as a start so that we can get its folder (day) and (month) folders
     limit = 1
-    jpegs = upload_files.get_files(auth_client,SEDGWICK,fname,0,limit) #returns list unordered, not guaranteed to have prefix
-    if len(jpegs) == limit and jpegs[0].name.startswith(fname):
+    jpegs = upload_files.get_files(auth_client,SEDGWICK,fname,0,limit) 
+    if DEBUG:
+        print 'len {0} jpeg {1}'.format(len(jpegs),jpegs[0].name)
+    if len(jpegs) == limit and jpegs[0].name.startswith(fname): #sanity check to make sure one was found
         #help/info from: https://docs.box.com/reference#folder-object-1
-        jpeg_parent = jpegs[0].parent['id'] #get the box ID for the folder of this file
-        fldr = upload_files.get_folder(auth_client,jpeg_parent) #returns folder object from box (here: parent folder)
+        day_folder_id = jpegs[0].parent['id'] #get the box ID for the folder of this file (day folder)
+        fldr = upload_files.get_folder(auth_client,day_folder_id) #returns folder object from box
+        month_folder_id = fldr.parent['id'] #get the box ID for the folder of this file (month folder)
+        fldr = upload_files.get_folder(auth_client,month_folder_id) #returns folder object from box 
 
         item_count = fldr['item_collection']['total_count'] #number of items in the folder total
-	#the following only contains 100 items max in folder, if total files <=100 then use it
-   	#ents = fldr['item_collection']['entries']  #not using this optimization b/c most directories have >100 files
+        if DEBUG:
+            print 'jpegs (sb 1): {0} folder id: {1} count:{2}'.format(len(jpegs),month_folder_id,item_count)
 
-        #loop through files in the directory 1000 at a time 
-        items = fldr.get_items(limit=1000,offset=0) #get all of the items (File objects) in the folder
-        done = False
-        while not done:
-            for ent in items:
-                    if type(ent).__name__=='File':  #make sure that item has type boxsdk.object.file.File; it could be a Folder
-                    if ent['name'].startswith(fname):
-                        namelist.append(ent['name'])
-		        ids[ent['name']] = ent['id']
+        count = 0
+        foundcount = 0
+
+        #get all of the items (Folder objects) in the month folder 
+        #assumption: there will never be more than 31 folders (days/mo) so additional looping is not needed
+        #extra files may get in the way (thus limit=1000), but we should not store anything in month
+        #folders except for day folders!  
+        days = fldr.get_items(limit=1000,offset=0) 
+        if DEBUG: 
+            print '#days in month folder {0}: {1}'.format(month_folder_id,len(days))
+        for day in days:
+            #loop through day folders in month folder
+            if DEBUG: 
+                print '#file (in month folder) id: {0} name: {1} type: {2}'.format(day.id,day.name,type(day).__name__)
+            if type(day).__name__=='Folder':  
+                #loop through files in the directory 1000 (max on folder get_items) at a time, starting at 0 oset
+                lim = 1000
+                oset = 0
+                jpegs = day.get_items(limit=lim,offset=oset) #get all of the items (File objects) in the folder
+                if DEBUG: 
+                    print '#jpegs in day folder {0}: {1}, limit {2}, offset {3}'.format(day.id,len(jpegs),lim,oset)
+                while len(jpegs) > 0:
+                    #testfound = 0
+                    for ent in jpegs:
+                        #make sure that item has type boxsdk.object.file.File; it could be a Folder
+                        if type(ent).__name__=='File':  
+                            if ent['name'].startswith(fname):
+                                #print 'found one: {0}'.format(ent['name'])
+			        foundcount += 1
+			        #testfound += 1
+                                namelist.append(ent['name'])
+		                ids[ent['name']] = ent['id']
+                        count += 1
+                    if len(jpegs) == lim:
+                        oset += lim
+                        jpegs = day.get_items(limit=lim,offset=oset) #get all of the items (File objects) in the folder
+                        if DEBUG:
+                            print '\tnext loop: #jpegs in day folder {0}: {1}, limit {2}, offset {3}'.format(day.id,len(jpegs),lim,oset)
+                    else: 
+                        break
+           
+        if DEBUG:
+            #sanity check, verify that foundcount is the same as the number box says
+            print 'total count: {0} foundcount: {1}'.format(count,foundcount)    
 
         first = True
         last = None
+        #loop through the jpegs to generate Sequence.csv and a series/sequence ID for each image
         for name in sorted(namelist):
 
 	    #file name format: Main_2013-10-13_14:20:40_17274.JPG
@@ -255,6 +301,7 @@ def main():
 	print 'Error, no files came back for fname:{0}'.format(fname)
         sys.exit(1)
 
+    #loop through them again to generate Image.csv and to download each file from box and upload it to S3
     count = 0
     for name in sorted(namelist):
         count += 1
