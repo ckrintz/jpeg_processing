@@ -36,11 +36,11 @@ def generate_emammal_Image(deployID,seqID,iID,path,tss,writeHeader=False):
         with open('Image.csv','wt') as f: 
             csvFile = csv.writer(f)
             csvFile.writerow(('Deployment ID','Image Sequence ID','Image ID','Location','Image File Name','Photo Type', 'Photo Type Identified by','Genus Species','IUCN ID','IUCN Status','Date_Time','Interest Rank','Age','Sex','Individual ID','Count','Animal recognizable','Individual Animal Notes','Digital Origin','Embargo Period','Restrictions on Access','Image Use Restrictions'))
-            csvFile.writerow((deployID,seqID,iID,path,iID,'','','','','',tss,'None','','','','','','','born digital','','',''))
+            csvFile.writerow((deployID,seqID,iID,path,iID,'','Kate McCurdy','','','',tss,'None','','','',1,'','','born digital','','',''))
     else:
         with open('Image.csv','at') as f: 
             csvFile = csv.writer(f)
-            csvFile.writerow((deployID,seqID,iID,path,iID,'','','','','',tss,'None','','','','','','','born digital','','',''))
+            csvFile.writerow((deployID,seqID,iID,path,iID,'','Kate McCurdy','','','',tss,'None','','','',1,'','','born digital','','',''))
 
 def generate_emammal_Sequence(deployID,seqID,tss_start,tss_end,writeHeader=False):
     '''tss_start and tss_end are string datetime format: YYYY/MM/DD HH/mm/ss'''
