@@ -51,13 +51,11 @@ def generate_emammal_Sequence(deployID,seqID,tss_start,tss_end,writeHeader=False
         with open('Sequence.csv','wt') as f: 
             csvFile = csv.writer(f)
             csvFile.writerow(('Observation Type','Deployment ID','Image Sequence ID','Date_Time Begin','Date_Time End','Genus species','Species Common Name','Age','Sex','Individual ID','Count','Animal recognizable','Individual Animal Notes','TSN ID','IUCN ID','IUCN Status'))
-            csvFile.writerow(('Researcher',deployID,seqID,tss_start,tss_end,'Unknown Animal','Unknown Animal','','','','','','','2','2','NE'))
-            csvFile.writerow(('Volunteer',deployID,seqID,tss_start,tss_end,'Unknown Animal','Unknown Animal','','','','','','','2','2','NE'))
+            csvFile.writerow(('Researcher',deployID,seqID,tss_start,tss_end,'Unknown Animal','Unknown Animal','','','','',1,'','2','2','NE'))
     else:
         with open('Sequence.csv','at') as f: 
             csvFile = csv.writer(f)
-            csvFile.writerow(('Researcher',deployID,seqID,tss_start,tss_end,'Unknown Animal','Unknown Animal','','','','','','','2','2','NE'))
-            csvFile.writerow(('Volunteer',deployID,seqID,tss_start,tss_end,'Unknown Animal','Unknown Animal','','','','','','','2','2','NE'))
+            csvFile.writerow(('Researcher',deployID,seqID,tss_start,tss_end,'Unknown Animal','Unknown Animal','','','','',1,'','2','2','NE'))
 
 ############## END generate eMammal CSVs -- see ../emammal/CJKREADME for sample ################
 
