@@ -139,7 +139,11 @@ def main():
         print 'Error, uploadOnly and uploadCSVsOnly cannot both be set at the same time'
         sys.exit(1)
     if acc and sec and bkt and upload is not None:
-        upload_file_to_s3(upload,bkt,acc,sec,isText=(upload.endswith('.csv')),prefix=pref)
+        try:
+            upload_file_to_s3(upload,bkt,acc,sec,isText=(upload.endswith('.csv')),prefix=pref)
+        except:
+            time.sleep(5) #sleep for 5 seconds and try again
+            upload_file_to_s3(upload,bkt,acc,sec,isText=(upload.endswith('.csv')),prefix=pref)
         sys.exit(0)
     if not csvonly and upload is not None:
         print 'Error, uploadOnly must be set with all three s3 arguments for upload to be performed'
@@ -350,14 +354,25 @@ def main():
             if acc and sec and bkt:
 	        if not csvonly:
                     fileObj = upload_files.get_file(auth_client,ids[name]) #get the Box File object from the entity ID
-                    upload_file_to_s3(name,bkt,acc,sec,fileIsString=fileObj.content(),prefix=pref)
+		    try:
+                        upload_file_to_s3(name,bkt,acc,sec,fileIsString=fileObj.content(),prefix=pref)
+        	    except:
+            	        time.sleep(5) #sleep for 5 seconds and try again
+                        upload_file_to_s3(name,bkt,acc,sec,fileIsString=fileObj.content(),prefix=pref)
     
         #at this point all csv files are written.  Upload them to s3
         if acc and sec and bkt:
-            upload_file_to_s3('Deployment.csv',bkt,acc,sec,isText=True,prefix=pref)
-            upload_file_to_s3('Project.csv',bkt,acc,sec,isText=True,prefix=pref)
-            upload_file_to_s3('Sequence.csv',bkt,acc,sec,isText=True,prefix=pref)
-            upload_file_to_s3('Image.csv',bkt,acc,sec,isText=True,prefix=pref)
+	    try:
+                upload_file_to_s3('Deployment.csv',bkt,acc,sec,isText=True,prefix=pref)
+                upload_file_to_s3('Project.csv',bkt,acc,sec,isText=True,prefix=pref)
+                upload_file_to_s3('Sequence.csv',bkt,acc,sec,isText=True,prefix=pref)
+                upload_file_to_s3('Image.csv',bkt,acc,sec,isText=True,prefix=pref)
+            except:
+                time.sleep(5) #sleep for 5 seconds and try again
+                upload_file_to_s3('Deployment.csv',bkt,acc,sec,isText=True,prefix=pref)
+                upload_file_to_s3('Project.csv',bkt,acc,sec,isText=True,prefix=pref)
+                upload_file_to_s3('Sequence.csv',bkt,acc,sec,isText=True,prefix=pref)
+                upload_file_to_s3('Image.csv',bkt,acc,sec,isText=True,prefix=pref)
         else: 
             print 'not uploading files to s3:  s3acc, s3sec, and/or s3bkt is not set'
         print 'processed {0} files from Box for CSV generation for month {1} and prefix {2}'.format(count,cur_month,pref)
