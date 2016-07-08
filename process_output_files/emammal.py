@@ -153,6 +153,7 @@ def main():
     months = ['07']
     if args.multimonth:
         deploy_year = args.year
+        print 'using multimonth for year: {0} and all months'.format(deploy_year)
 
 	#tests: all but last should continue to next month with "Error, no files came back"
         #months = ['03','04','05','06'] #tests missing, empty dir,  dir with 1 dir,  one dir with dir and 1 entry

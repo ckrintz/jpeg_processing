@@ -31,12 +31,18 @@ def get_tokens() :
 
 #############################
 def get_folder(client,fid):    
-    folder = client.folder( folder_id=fid, ).get()
+    try:
+        folder = client.folder( folder_id=fid, ).get()
+    except: #try again
+        folder = client.folder( folder_id=fid, ).get()
     return folder
 
 #############################
 def get_file(client,fid):    
-    f = client.file( file_id=fid, ).get()
+    try:
+        f = client.file( file_id=fid, ).get()
+    except: #try again
+        f = client.file( file_id=fid, ).get()
     return f
 
 #############################
