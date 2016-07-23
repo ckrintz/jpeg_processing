@@ -245,7 +245,6 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
     #process image via OCR to get temperature 
     with timeblock('perform_OCR'):
         temp,err,_,_ = ocr.process_pic(pictype, fname)
-
     
     if temp is None and not testing:
         print 'Error in process_pic call, temp is None'
@@ -364,8 +363,9 @@ def main():
     global DEBUG
     logging.basicConfig()
     parser = argparse.ArgumentParser(description='Check/clean Box directories: remove/report any files that do not match')
-    parser.add_argument('map',action='store',help='json map filename with Box directories to check')
     parser.add_argument('imgdir',action='store',default=None,help='(local) Parent directory with camera folders and JPG files')
+    parser.add_argument('csvfn',action='store',help='CSV output filename prefix (one per camera)')
+    parser.add_argument('map',action='store',help='json map filename with Box directories to check')
     #json map format: "Lisque": ["7413964473","Lisque Mesa 1"],
     #			prefix	     ID	    actual fname prefix
 
@@ -401,7 +401,6 @@ def main():
         full_prefix = val[1] #used to check if a file belongs to this folder/key
         if DEBUG:
             print '{0}: {1}: {2}'.format(myfolder_id,prefix,full_prefix)
-
         folder = None
         try: 
             folder = auth_client.folder( folder_id=myfolder_id, ).get()
@@ -418,10 +417,18 @@ def main():
 
         if folder: 
             matchlist = process_box_folder(folder,args.delete)
+            if DEBUG:
+                print 'matchlist length: {0}'.format(len(matchlist))
 
             if args.checkmatches:
-	        #next, process the directory passed in to upload what doesn't match
-                process_local_dir(args.imgdir,folder,csvFile,auth_client,prefix,full_prefix,pictype,key,matchlist,False) #change last arg to True to upload missing files to box, False skips upload for testing purposes
+                #open the csv file for writing out the metainformation per JPG file
+                csvfname = '{0}_{1}.csv'.format(prefix,args.csvfn)
+                with open(csvfname,'wt') as f:
+                    csvFile = csv.writer(f)
+                    writeIntro(csvFile)
+
+	            #next, process the directory passed in to upload what doesn't match
+                    process_local_dir(args.imgdir,folder,csvFile,auth_client,prefix,full_prefix,pictype,key,matchlist,False) #change last arg to True to upload missing files to box, False skips upload for testing purposes
 
 if __name__ == '__main__':
     main()
