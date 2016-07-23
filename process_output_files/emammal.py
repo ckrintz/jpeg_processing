@@ -121,7 +121,8 @@ def main():
     parser.add_argument('--uploadOnly',default=None,action='store',help='Local file name in current working directory to upload to S3. This is used if the original run has exceptions with the s3 upload (which then writes the file locally).  Note the file names from this problem run and run this program for each individual name to upload.')
     parser.add_argument('--uploadCSVsOnly',default=False,action='store_true',help='Generate and upload CSV files (metainfo) only to S3 (requires s3acc,s3sec,s3bkt)')
     parser.add_argument('--multimonth',default=False,action='store_true',help='Process all months, by month in the year specified by --year (2013 used if --year not set)')
-    parser.add_argument('--year',default='2013',action='store',help='Only works when multimonth is set, must be 2013,2014,2015,or 2016')
+    parser.add_argument('--year',default='2013',action='store',help='Must be 2013,2014,2015,or 2016')
+    parser.add_argument('--month',default='2013',action='store',help='Must be 01,02,03,04,05,06,07,08,09,10,11,12')
     parser.add_argument('--debug',action='store_true',default=False,help='Turn debugging on')
     args = parser.parse_args()
 
@@ -149,10 +150,11 @@ def main():
         print 'Error, uploadOnly must be set with all three s3 arguments for upload to be performed'
         sys.exit(1)
 
-    deploy_year = '2013'
-    months = ['07']
+    #deploy_year = '2013'
+    #months = ['07']
+    deploy_year = args.year
+    months = [args.month]
     if args.multimonth:
-        deploy_year = args.year
         print 'using multimonth for year: {0} and all months'.format(deploy_year)
 
 	#tests: all but last should continue to next month with "Error, no files came back"
@@ -161,7 +163,7 @@ def main():
         months = ['01','02','03','04','05','06','07','08','09','10','11','12']
 
 
-    '''This code assumes we are processing one month maximum (less works) and produces csvs accordingly'''
+    '''This code assumes we are processing one month at a time max (less works) and produces csvs accordingly'''
     #emammal requests each deployment be for a single month in a year.  July (07) 2013 is the first large test:
 
     #log into box if needed

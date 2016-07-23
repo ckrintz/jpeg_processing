@@ -7,7 +7,7 @@ from boxsdk import OAuth2
 from boxsdk import Client
 import OpenSSL
 
-DEBUG = False
+DEBUG = True
 TOKENS = 'tokens.json'
 #############################
 def store_tokens(access_token, refresh_token):
