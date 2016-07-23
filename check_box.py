@@ -4,14 +4,13 @@ import json, sys, argparse, csv, logging, os, time
 import exifread
 from datetime import datetime, timedelta
 from contextlib import contextmanager
-import upload_files
-import ocr
 from boxsdk.exception import BoxAPIException
 from boxsdk.exception import BoxOAuthException
 from requests.exceptions import ConnectionError
 import OpenSSL
 import urllib3
 urllib3.disable_warnings()
+import upload_files, jpeg_processor, ocr
 
 DEBUG = False
 ######################## timer utility ############################
@@ -67,7 +66,7 @@ def process_local_dir(fn,folder,csvFile,client,prefix,preflong,pictype,key,match
                     testing = not uploadIt  #upload if missing and uploadIt is True
 		    print 'missing:{0}:{1}'.format(orig_fname,newfname)
                 #process the file and generate the CSV, only upload to box according to testing
-		process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,key,testing)
+		jpeg_processor.process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,key,testing)
 
 
 ######################## process_box_folder ############################
