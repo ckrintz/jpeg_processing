@@ -109,6 +109,24 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
                 if tag not in ('JPEGThumbnail', 'TIFFThumbnail'):
                     print "Key: %s, value %s" % (tag, tags[tag])
 
+def validation_problem(folder, fileName):
+    #check that folder hierarchy (foldername, parent foldername, grandparent foldername, greatgrandparent folder name) matches that of the fileName
+    parname = folder['name']
+    col = folder['path_collection']
+    pathlen = col['total_count']
+    dirary = col['entries']
+    prefix = '{0}_{1}-{2}-{3}'.format(
+        dirary[pathlen-3]['name'], #camera
+        dirary[pathlen-2]['name'], #year
+        dirary[pathlen-1]['name'], #month
+        parname #day
+        )
+    if not fileName.startswith(prefix):
+        print 'Error in validation of box and filename: {0}:{1}'.format(fileName,prefix)
+	return True
+    else:
+        print 'Box validation passed: {0}:{1}'.format(fileName,prefix)
+    return False
 
 def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,key,testing=False):
     #fname is full path and file name, key is the name of the entry in the map (sedgwick_map.json)
@@ -132,6 +150,7 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
         t = dt_tag.split()[1]
 
     day_folder = None  #set either from cache (fast) or by going to box (slow)
+    day_folder_name = None  #set either from cache (fast) or by going to box (slow)
     folder_name = prefix
 
     #check folder, create if needed
@@ -157,11 +176,15 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
         else: 
             flist = fcache[cache_key]
         #regardless of path above, we have a valid flist at this point for this year and month
+        #if DEBUG:
+        print 'cache_key: {0}'.format(cache_key)
 
         if dy in flist: #check if dy is a key in the dictionary, if so, get the folder
+            print 'day in flist: {0}'.format(dy)
 	    day_folder = flist[dy]
 	    day_folder_name = day_folder.get()['name']
         elif nody in flist:
+            print 'nody (no yr_mo_day) in flist'
             #yr_mo_day is not in the cache for this location 
 	    #if yr_mo_0 is (no days created yet), then use it to create dy folder
 	    mo_folder = flist['0']
@@ -223,15 +246,18 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
         assert day_folder is not None
         assert day_folder_name is not None
 
-        if DEBUG:
-            print 'day folder name {0}'.format(day_folder_name)
 
     #upload file to box day_folder or elsewhere
     newfname = '{0}_{1}_{2}_{3}.JPG'.format(prefix,d,t,photo_id)
-    if DEBUG:
-        print 'filename to ship: {0} remote fname: {1}'.format(
-            fname,newfname)
 
+    #verify that we have it right
+    if validation_problem(day_folder, newfname):
+        sys.exit(1)
+
+    if DEBUG:
+        print 'day folder name {0}'.format(day_folder_name)
+        print 'filename to ship: {0} remote fname: {1}'.format(fname,newfname)
+    
     temp = None
     err = 'TESTING'
     if not testing:
