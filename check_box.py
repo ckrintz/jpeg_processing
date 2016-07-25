@@ -146,6 +146,7 @@ def main():
     parser.add_argument('--debug',action='store_true',default=False,help='Turn debugging on (default: off)')
     parser.add_argument('--delete',action='store_true',default=False,help='Turn deletion of box files on, just report if off (default)')
     parser.add_argument('--checkmatches',action='store',default=None,help='Compare box list with files in the directory passed in to this argument')
+    parser.add_argument('--matchlist',action='store',default=None,help='Filename for matchlist to use.  If empty or nonexistent, process will store generated matchlist file.')
     args = parser.parse_args()
     DEBUG = args.debug
 
@@ -221,7 +222,25 @@ def main():
                    print '{0}:{1}'.format(cjkfname,prefix)
                    sys.exit(1)
             
-            matchlist = process_box_folder(folder,args.delete)
+	    #check if matchlist has already been created
+            matchlist = []
+	    write_matchlist = False
+	    if args.matchlist:
+                write_matchlist = True
+                if os.path.isfile(args.matchlist):
+                    with open(args.matchlist,'rb') as ml_file:    
+			for entry in ml_file:
+			    matchlist.append(entry)
+
+            if len(matchlist) == 0:  #only create it if we didn't pass it in
+                matchlist = process_box_folder(folder,args.delete)
+
+            #write out the matchlist for future use
+            if write_matchlist:
+                with open(args.matchlist,'wb') as ml_file:
+	            for entry in matchlist:
+		        ml_file.write(entry)
+
             if DEBUG:
                 print 'matchlist length: {0}'.format(len(matchlist))
 

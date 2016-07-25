@@ -1,5 +1,23 @@
 '''Author: Chandra Krintz, UCSB, ckrintz@cs.ucsb.edu, AppScale BSD license'''
 
+'''USAGE: python2.7 check_box.py mainCJK mymap.json --debug --delete --checkmatches ../photos2/ --matchlist mainCJK_matchlist.txt
+        - reads in mymap.json for list of box directory to consider
+        - performs handshake with box API to setup access (upload_files.py)
+        - for each entry in the json file do the following:
+                - get the parent folder for the camera location in box (ID is in json file)
+                - check each file in box to make sure it is in the right directory.  Delete it (--delete) if it is not.
+                - generate a list of files in the box hierarchy below this folder
+                        - called matchlist
+                        - there are two options for generation of matchlist
+                                - read it in (--matchlist arg) from a previously generated run
+                                - or call process_box_folder on the folder (more on this below)
+                        - save off the matchlist to the same file name as the one passed in if any
+        - loop through each JPG file (for this camera) in the local directory passed in (checkmatches argument)
+                - if the file is not in matchlist, upload it (jpeg_processor.py,upload_files.py) to box in the right directory
+                - call validation_problem in jpeg_processor.py to verify the directory is correct, exit upon error (bug!)
+	- Dumps progress and details to stdout (--debug)
+'''
+
 import json, sys, argparse, csv, logging, os, time
 import exifread
 from datetime import datetime, timedelta
@@ -160,7 +178,7 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
     dy = splitd[2]
     nody = '00'
     if DEBUG:
-        print 'yr: {0}, mo: {1}, dy: {2}, foldername: {3}'.format(yr,mo,dy,folder_name)
+        print 'yr: {0}, mo: {1}, dy: {2}, foldername: {3}, testing: {4}'.format(yr,mo,dy,folder_name,testing)
 
     if not testing: #none of this is needed if we aren't uploading to box
         folder_name = folder['name']
@@ -250,17 +268,19 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
     #upload file to box day_folder or elsewhere
     newfname = '{0}_{1}_{2}_{3}.JPG'.format(prefix,d,t,photo_id)
 
-    #verify that we have it right
-    if validation_problem(day_folder, newfname):
-        sys.exit(1)
-
     if DEBUG:
-        print 'day folder name {0}'.format(day_folder_name)
         print 'filename to ship: {0} remote fname: {1}'.format(fname,newfname)
     
     temp = None
     err = 'TESTING'
     if not testing:
+        if DEBUG:
+            print 'day folder name {0}'.format(day_folder_name)
+        #verify that we have it right
+        with timeblock('validate_BOX_folder'):
+            if validation_problem(day_folder, newfname):
+                sys.exit(1)
+
         #upload to box
         with timeblock('upload_BOX'):
             upload_files.runit(fname,day_folder,client,newfname)
