@@ -129,7 +129,9 @@ def runit(mydir,folder,client,newFName=None):
 
     #get the list of filenames already in the folder dictionary
     processed_list = ''
-    entries = folder['response_object']['entries']
+    print 'runit: folder = {0}:{1} total entries: {2} entries len: {3}'.format(folder,folder['id'],folder['item_collection']['total_count'],len(folder['item_collection']['entries']))
+    entries = folder['item_collection']['entries']
+    ##entries = folder['response_object']['entries']
     #respobj = folder.__dict__['_response_object']
     #items = respobj['item_collection']
     #entries = items['entries']

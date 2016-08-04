@@ -31,7 +31,7 @@ import OpenSSL
 import urllib3
 urllib3.disable_warnings()
 
-DEBUG = False
+DEBUG = True
 fcache = {}
 
 #timer utility

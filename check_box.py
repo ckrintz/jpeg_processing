@@ -232,6 +232,8 @@ def main():
 			for entry in ml_file:
 			    matchlist.append(entry)
 
+            if DEBUG:
+                print 'Matchlist length: {0}'.format(len(matchlist))
             if len(matchlist) == 0:  #only create it if we didn't pass it in
                 matchlist = process_box_folder(folder,args.delete)
 
@@ -240,6 +242,7 @@ def main():
                 with open(args.matchlist,'wb') as ml_file:
 	            for entry in matchlist:
 		        ml_file.write(entry)
+		        ml_file.write('\n')
 
             if DEBUG:
                 print 'matchlist length: {0}'.format(len(matchlist))
