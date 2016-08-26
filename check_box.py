@@ -118,6 +118,8 @@ def process_box_folder(folder,deleteIt):
                             while len(files) > 0:
                                 for f in files:
 				    if type(f).__name__=='File' and f['name'].startswith(prefix):
+                                        #if DEBUG: 
+                                            #print 'appending to matchlist: {0} prefix: {1}'.format(f['name'],prefix)
                                         matchlist.append(f['name'])
 				    else:
                                         if type(f).__name__=='File': #file for which prefix doesn't match -- its in the wrong folder!
@@ -235,18 +237,24 @@ def main():
             if DEBUG:
                 print 'Matchlist length: {0}'.format(len(matchlist))
             if len(matchlist) == 0:  #only create it if we didn't pass it in
+                print 'Creating matchlist'
                 matchlist = process_box_folder(folder,args.delete)
 
+            if DEBUG:
+                print 'Writing out: Matchlist length: {0}'.format(len(matchlist))
             #write out the matchlist for future use
             if write_matchlist:
                 with open(args.matchlist,'wb') as ml_file:
 	            for entry in matchlist:
-		        ml_file.write(entry)
-		        ml_file.write('\n')
+			if entry is not '' and entry is not ' ':
+                            print 'ml: {0}'.format(entry)
+		            ml_file.write(entry)
+		            ml_file.write('\n')
 
             if DEBUG:
-                print 'matchlist length: {0}'.format(len(matchlist))
+                print 'Done with matchlist -- matchlist length: {0}'.format(len(matchlist))
 
+            sys.exit(1)
             if args.checkmatches:
                 #open the csv file for writing out the metainformation per JPG file
                 csvfname = '{0}_{1}.csv'.format(args.csvfn,prefix)
