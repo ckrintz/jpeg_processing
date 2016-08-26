@@ -244,17 +244,21 @@ def main():
                 print 'Writing out: Matchlist length: {0}'.format(len(matchlist))
             #write out the matchlist for future use
             if write_matchlist:
+                count = 0
                 with open(args.matchlist,'wb') as ml_file:
 	            for entry in matchlist:
-			if entry is not '' and entry is not ' ':
-                            print 'ml: {0}'.format(entry)
+                        entry = entry.strip()
+		        if len(entry) > 0 and entry is not '' and entry is not ' ':
 		            ml_file.write(entry)
 		            ml_file.write('\n')
+                        else:
+                            count += 1
+                print 'number of empty entries: {0}'.format(count)
+                #if the above is > 0, then check why these get put into matchlist to begin with!
 
             if DEBUG:
                 print 'Done with matchlist -- matchlist length: {0}'.format(len(matchlist))
 
-            sys.exit(1)
             if args.checkmatches:
                 #open the csv file for writing out the metainformation per JPG file
                 csvfname = '{0}_{1}.csv'.format(args.csvfn,prefix)
