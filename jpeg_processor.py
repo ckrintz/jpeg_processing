@@ -248,7 +248,7 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
 		        #or has been created if mof was found. 
                         #if neither of the above occured, it will be None here
                         if day_folder is None: #create it
-                            mo_folder = yrf.create_subfolder(mo)
+                            mof = yrf.create_subfolder(mo)
                             day_folder = mof.create_subfolder(dy)
         	            flist[dy] = day_folder #cache it
                         break #out of ikey (yr) loop b/c we have a day_folder
@@ -256,8 +256,8 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
             #if we reach here, yr folder was not found, create a year, month and day folder 
             if day_folder is None:
                 yr_folder = folder.create_subfolder(yr)
-                mo_folder = yr_folder.create_subfolder(mo)
-                day_folder = mo_folder.create_subfolder(dy)
+                mof = yr_folder.create_subfolder(mo)
+                day_folder = mof.create_subfolder(dy)
                 flist[dy] = day_folder #cache it
             day_folder_name = day_folder.get()['name']
         
