@@ -1,3 +1,10 @@
+python emammal.py --s3acc='AKIAJK6LLE3WVIB6LZBQ' --s3sec='whKJK7Z0yXxsMyngxcN/j1OF5hh4WZ7c3QDR6+Q7' --s3bkt='incoming-legacy-data' --multimonth --debug
+
+nohup python emammal.py --s3acc='AKIAJK6LLE3WVIB6LZBQ' --s3sec='whKJK7Z0yXxsMyngxcN/j1OF5hh4WZ7c3QDR6+Q7' --s3bkt='incoming-legacy-data' --multimonth --year 2013 --debug >& emammal2013.out &
+nohup python emammal.py --s3acc='AKIAJK6LLE3WVIB6LZBQ' --s3sec='whKJK7Z0yXxsMyngxcN/j1OF5hh4WZ7c3QDR6+Q7' --s3bkt='incoming-legacy-data' --multimonth --year 2014 --debug >& emammal2014.out &
+nohup python emammal.py --s3acc='AKIAJK6LLE3WVIB6LZBQ' --s3sec='whKJK7Z0yXxsMyngxcN/j1OF5hh4WZ7c3QDR6+Q7' --s3bkt='incoming-legacy-data' --multimonth --year 2015 --debug >& emammal2015.out &
+nohup python emammal.py --s3acc='AKIAJK6LLE3WVIB6LZBQ' --s3sec='whKJK7Z0yXxsMyngxcN/j1OF5hh4WZ7c3QDR6+Q7' --s3bkt='incoming-legacy-data' --multimonth --year 2016 --debug >& emammal2016.out &
+-------------------------
 
 1) Setup
 

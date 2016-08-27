@@ -122,7 +122,7 @@ def main():
     parser.add_argument('--uploadCSVsOnly',default=False,action='store_true',help='Generate and upload CSV files (metainfo) only to S3 (requires s3acc,s3sec,s3bkt)')
     parser.add_argument('--multimonth',default=False,action='store_true',help='Process all months, by month in the year specified by --year (2013 used if --year not set)')
     parser.add_argument('--year',default='2013',action='store',help='Must be 2013,2014,2015,or 2016')
-    parser.add_argument('--month',default='2013',action='store',help='Must be 01,02,03,04,05,06,07,08,09,10,11,12')
+    parser.add_argument('--month',default='07',action='store',help='Must be 01,02,03,04,05,06,07,08,09,10,11,12')
     parser.add_argument('--debug',action='store_true',default=False,help='Turn debugging on')
     args = parser.parse_args()
 
