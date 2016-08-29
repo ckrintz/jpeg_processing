@@ -1,6 +1,10 @@
 '''Author: Chandra Krintz, UCSB, ckrintz@cs.ucsb.edu, AppScale BSD license'''
 
-'''USAGE: python2.7 check_box.py mainCJK mymap.json --debug --delete --checkmatches ../photos2/ --matchlist mainCJK_matchlist.txt
+'''
+USAGE: python2.7 jpeg_processor.py --newocr --noupload ../photos2/ sedgwick_map.json noupload_all2.csv >& jpp_noupload.out 
+or
+
+USAGE: python2.7 check_box.py mainCJK mymap.json --debug --delete --checkmatches ../photos2/ --matchlist mainCJK_matchlist.txt
         - reads in mymap.json for list of box directory to consider
         - performs handshake with box API to setup access (upload_files.py)
         - for each entry in the json file do the following:
@@ -23,7 +27,7 @@ import exifread
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 import upload_files
-import ocr
+import ocr,crop_and_recognize
 from boxsdk.exception import BoxAPIException
 from boxsdk.exception import BoxOAuthException
 from requests.exceptions import ConnectionError
@@ -31,8 +35,9 @@ import OpenSSL
 import urllib3
 urllib3.disable_warnings()
 
-DEBUG = True
+DEBUG = False
 fcache = {}
+newocr = False
 
 #timer utility
 @contextmanager
@@ -290,7 +295,22 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
 
     #process image via OCR to get temperature 
     with timeblock('perform_OCR'):
-        temp,err,_,_ = ocr.process_pic(pictype, fname)
+        if not newocr:
+            temp,err,_,_ = ocr.process_pic(pictype, fname)
+        else:
+            print "Using newocr, image name is: {0}".format(fname)
+            try:
+                if pictype == 1:
+                    temp = crop_and_recognize.run_c3(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_3/')
+                if pictype == 2:
+                    temp = crop_and_recognize.run_c2(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_2/')
+                if pictype == 3:
+                    temp = crop_and_recognize.run_c1(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_1/')
+            except Exception as e:
+                print e
+		print pictype, fname
+		sys.exit(1)
+            print "Temp is: {0}".format(temp)
 
     
     if temp is None and not testing:
@@ -313,6 +333,7 @@ def writeIntro(csvFile):
 
 
 def main():
+    global newocr
     logging.basicConfig()
     parser = argparse.ArgumentParser(description='JPEG Processing')
     #required arguments
@@ -323,9 +344,11 @@ def main():
     parser.add_argument('csvfn',action='store',help='CSV output filename')
     #optional arguments
     parser.add_argument('--debug',action='store',default=False,type=bool,help='Turn debugging on')
+    parser.add_argument('--newocr',action='store_true',default=False,help='Use Andys OCR')
     parser.add_argument('--noupload',action='store_true',default=False,help='Turn uploading to box off')
     args = parser.parse_args()
     testing = args.noupload
+    newocr = args.newocr
 
     #read in the map
     with open(args.map,'r') as map_file:    
