@@ -166,6 +166,7 @@ def runit(mydir,folder,client,newFName=None):
 #############################
 def upload_it(folder, file_to_upload,fname,plist_in,plist_out=None):
 
+    #if we return False (error) the caller will retry once
     if fname in plist_in:
         if DEBUG:
             print 'skipping {0}'.format(fname)
