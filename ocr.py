@@ -129,6 +129,7 @@ def process_pic(pictype,base):
 def get_temp(pictype,rioname):
 
     #extract the temperature from the cropped image using OCR
+    #returns err = True if there is some issue with the ocr process, False = alls well
     err = False
     im = Image.open(rioname)
     s = pytesseract.image_to_string(im)

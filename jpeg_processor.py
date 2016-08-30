@@ -277,7 +277,7 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
         print 'filename to ship: {0} remote fname: {1}'.format(fname,newfname)
     
     temp = None
-    err = 'TESTING'
+    err = False #no error
     if not testing:
         if DEBUG:
             print 'day folder name {0}'.format(day_folder_name)
@@ -295,27 +295,36 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
 
     #process image via OCR to get temperature 
     with timeblock('perform_OCR'):
-        if not newocr:
+        if not newocr: #err is a boolean, False if there was an issue
             temp,err,_,_ = ocr.process_pic(pictype, fname)
+            print 'OrigOCR: Temp is: {0}'.format(temp)
         else:
-            print "Using newocr, image name is: {0}".format(fname)
+            print 'Using newocr, image name is: {0}'.format(fname)
+            err = False # no error
             try:
                 if pictype == 1:
-                    temp = crop_and_recognize.run_c3(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_3/')
-                if pictype == 2:
-                    temp = crop_and_recognize.run_c2(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_2/')
-                if pictype == 3:
                     temp = crop_and_recognize.run_c1(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_1/')
+                elif pictype == 2:
+                    temp = crop_and_recognize.run_c2(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_2/')
+                elif pictype == 3:
+                    temp = crop_and_recognize.run_c3(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_3/')
+                else:
+		    print 'Error unknown pictype: {0}'.format(pictype)
+		    temp = -9999
+		    err = True
             except Exception as e:
                 print e
-		print pictype, fname
-		sys.exit(1)
-            print "Temp is: {0}".format(temp)
+		print 'Error in call to crop_and_recognize: {0}, {1}'.format(pictype, fname)
+		temp = -9999
+		err = True #error
+            print "NewOCR: Temp is: {0}".format(temp)
 
     
-    if temp is None and not testing:
-        print 'Error in process_pic call, temp is None'
     check_temp = err
+    if temp is None or temp == -9999:
+        print 'Error in OCR call'
+        temp = -9999
+        check_temp = True
 
     #store metainfo in the csv file
     sz = os.path.getsize(fname) #size in bytes
