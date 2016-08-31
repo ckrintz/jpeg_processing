@@ -83,6 +83,8 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
                         idx = 3
                     elif ele.startswith('RCNX'):
                         idx = 3
+                    elif ele.startswith('MFDC'):
+                        idx = 3
 		    else:
 		        idx = ele.rindex(' ') #xxx 500.JPG
                     photo_id = ele[idx+1:len(ele)-4]
@@ -205,7 +207,12 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
         if dy in flist: #check if dy is a key in the dictionary, if so, get the folder
             print 'day in flist: {0}'.format(dy)
 	    day_folder = flist[dy]
-	    day_folder_name = day_folder.get()['name']
+	    try:
+	        day_folder_name = day_folder.get()['name']
+            except Exception as e:
+                print e
+                print 'retrying1'
+	        day_folder_name = day_folder.get()['name']
         elif nody in flist:
             print 'nody (no yr_mo_day) in flist'
             #yr_mo_day is not in the cache for this location 
@@ -213,28 +220,63 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
 	    mo_folder = flist['0']
 	    day_folder = mo_folder.create_subfolder(dy)
             flist[dy] = day_folder
-	    day_folder_name = day_folder.get()['name']
+  	    try:
+	        day_folder_name = day_folder.get()['name']
+            except Exception as e:
+                print e
+                print 'retrying2'
+	        day_folder_name = day_folder.get()['name']
         #else, we need to create the year and month folder or just the month folder, 
         #leaving day_folder None will trigger this lookup
         
         if day_folder is None:
             with timeblock('checkOrCreateFolder_BOX'):
                 #check if there is a directory called yr in the folder, if not make it
-                items = folder.get_items(limit=100, offset=0)
+                try:
+                    items = folder.get_items(limit=100, offset=0)
+                except Exception as e:
+                    print e
+                    print 'retrying3'
+                    items = folder.get_items(limit=100, offset=0)
                 for ikey in items:
-                    yrf = ikey.get()
+                    try:
+                        yrf = ikey.get()
+                    except Exception as e:
+                        print e
+                        print 'retrying4'
+                        yrf = ikey.get()
                     if yr == yrf['name']:
                         #found the year folder, check for the month folder
-                        moitems = yrf.get_items(limit=100,offset=0)
+                        try:
+                            moitems = yrf.get_items(limit=100,offset=0)
+                        except Exception as e:
+                            print e
+                            print 'retrying5'
+                            moitems = yrf.get_items(limit=100,offset=0)
                         if moitems is not None:
                             for mokey in moitems:
-                                mof = mokey.get()       
+                                try:
+                                    mof = mokey.get()       
+                                except Exception as e:
+                                    print e
+                                    print 'retrying6'
+                                    mof = mokey.get()       
                                 if mo == mof['name']:
                                     #found the month folder, check for the day folder
-                                    dyitems = mof.get_items(limit=100,offset=0)
+				    try:
+                                        dyitems = mof.get_items(limit=100,offset=0)
+                                    except Exception as e:
+                                        print e
+                                        print 'retrying7'
+                                        dyitems = mof.get_items(limit=100,offset=0)
                                     if dyitems is not None:
                                         for dykey in dyitems:
-                                            dyf = dykey.get()       
+                                            try:
+                                                dyf = dykey.get()       
+                                            except Exception as e:
+                                                print e
+                                                print 'retrying8'
+                                                dyf = dykey.get()       
                                             if dy == dyf['name']:
                                                 #found the day folder, cache it
 			                        day_folder = dyf
@@ -264,7 +306,12 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
                 mof = yr_folder.create_subfolder(mo)
                 day_folder = mof.create_subfolder(dy)
                 flist[dy] = day_folder #cache it
-            day_folder_name = day_folder.get()['name']
+            try:
+                day_folder_name = day_folder.get()['name']
+            except Exception as e:
+                print e
+                print 'retrying9'
+                day_folder_name = day_folder.get()['name']
         
         assert day_folder is not None
         assert day_folder_name is not None
