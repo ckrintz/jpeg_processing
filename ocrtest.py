@@ -26,12 +26,13 @@ def timeblock(label):
 def get_exif(fn,pictype):
     '''  Extract the jpeg metadata from JPG files and call OCR on it, returning image date and temp'''
     stop_tag = 'Image DateTime' #token to search for in the JPG info
-    dl_tag = None
-    with open(fn, 'rb') as f:
-        tags = exifread.process_file(f, stop_tag=stop_tag)
-        fullfname = os.path.abspath(fn)
-	print 'Full filename: {0}'.format(fullfname)
+    dt_tag = None
+    fullfname = os.path.abspath(fn)
+    print 'Full filename: {0}'.format(fullfname)
+    with open(fullfname, 'rb') as f:
+        tags = exifread.process_file(f)
         dt_tag = vars(tags[stop_tag])['printable']
+
         if pictype == 1:
             temp = crop_and_recognize.run_c1(fullfname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_1/')
         elif pictype == 2:
@@ -41,7 +42,7 @@ def get_exif(fn,pictype):
         else:
 	    print 'Error unknown pictype: {0}'.format(pictype)
 	    temp = -9999
-    print 'Filename: {0}, datetime {1}, pictype {2}, temp {3}'.format(fn,dl_tag,pictype,temp)
+    print 'Filename: {0}, datetime {1}, pictype {2}, temp {3}'.format(fn,dt_tag,pictype,temp)
 
 def main():
     global newocr
