@@ -72,7 +72,6 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
                 fname = os.path.join(root, ele) #full path name
                 #if ele.endswith(".JPG"):
                 if ele.endswith(".JPG") and (preflong in fname):
-
                     #extract the photo ID from the file name
 		    #filenames are IMAG0ID.JPG, IMG_ID.JPG, RCNXID.JPG for each different camera
                     if printAll:
@@ -85,6 +84,14 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
                         idx = 3
                     elif ele.startswith('MFDC'):
                         idx = 3
+			#this is a new Vulture Trough camera, change the pictype from 2 to TBD
+			if 'Vulture Trough' in preflong:
+			    #pictype = TBD
+			    print 'Error: new Vulture Trough pictype not yet supported (skipping) (MFDC): {0}'.format(fname)
+			    continue
+			else: 
+			    print 'Error: cannot process this filename (MFDC): {0}'.format(fname)
+			    continue
 		    else:
 		        idx = ele.rindex(' ') #xxx 500.JPG
                     photo_id = ele[idx+1:len(ele)-4]

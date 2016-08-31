@@ -1,5 +1,6 @@
 #! /bin/bash
 #run the test if no args are passed
+export PYTHONPATH=.:ocr_knn/initial_tasks/task3/
 if [ $# -eq 0 ]
     then
         #test
