@@ -31,7 +31,14 @@ def get_exif(fn,pictype):
     print 'Full filename: {0}'.format(fullfname)
     with open(fullfname, 'rb') as f:
         tags = exifread.process_file(f)
+	#uncomment this to see all of the keys in tags:
+	#print 'All tags in jpeg metadata:\n{0}'.format(tags)
         dt_tag = vars(tags[stop_tag])['printable']
+        stop_tag = 'EXIF ExifImageLength'
+        len_tag = vars(tags[stop_tag])['printable']
+        stop_tag = 'EXIF ExifImageWidth'
+        wid_tag = vars(tags[stop_tag])['printable']
+        print 'Filename: {0}, datetime {1}, res {2}x{3}, pictype {4}'.format(fn,dt_tag,wid_tag,len_tag,pictype)
 
         if pictype == 1:
             temp = crop_and_recognize.run_c1(fullfname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_1/')
@@ -42,7 +49,8 @@ def get_exif(fn,pictype):
         else:
 	    print 'Error unknown pictype: {0}'.format(pictype)
 	    temp = -9999
-    print 'Filename: {0}, datetime {1}, pictype {2}, temp {3}'.format(fn,dt_tag,pictype,temp)
+        
+        print 'temp {0}'.format(temp)
 
 def main():
     global newocr
