@@ -28,6 +28,7 @@ def main():
     parser.add_argument('csvfn',action='store',help='csv file containing rows of col1=box_path:filename')
     parser.add_argument('dirname',action='store',help='image directory')
     parser.add_argument('map',action='store',help='prefix filename json map')
+    parser.add_argument('--countonly',action='store_true',default=False,help='count number of files under dir only')
     args = parser.parse_args()
 
     #read in the prefix map
@@ -62,12 +63,18 @@ def main():
     count = 0
     notfoundcount = 0
 
+    print 'Starting directory search'
     #loop through files in directory, construct name, see if name is in the map
     if os.path.isdir(args.dirname):
         for root, subFolders, files in os.walk(args.dirname):
             for ele in files:
                 fname = os.path.join(root, ele) #full path name
                 if ele.endswith(".JPG"):
+		    if args.countonly:
+                        count += 1
+			if count % 100 == 0:
+			    print 'counting... {0}'.format(count)
+		        continue
                     if ele.startswith('IMAG'):
                         idx = 4
                     elif ele.startswith('IMG_'):
@@ -112,11 +119,14 @@ def main():
 				print 'orig sz: {0}, new sz: {1}, True_if_Same: {2}'.format(flist['size'],sz,(flist['size']==sz))
 				print 'orig name: {0}, new name: {1}, True_if_Same: {2}'.format(flist['orig_fname'],ele,(flist['orig_fname']==ele))
                                 notfoundcount += 1
+		    if not found:
+			print 'Error, missing3 fname (no prefix match): {0}'.format(fname)
+                        notfoundcount += 1
 
-        else: 
-            print 'Error: second parameter must be a directory: {0}'.format(args.dirname)
+    else: 
+        print 'Error: second parameter must be a directory: {0}'.format(args.dirname)
 
-    print 'Name_dict_count: {0}, found: {1}, notfound: {2}, f+nf: {3}'.format(name_dict_count, count, notfoundcount, (count+notfoundcount))
+    print 'Name_dict_count: {0}, found: {1}, notfound: {2}, f+nf: {3}'.format(namedict_count, count, notfoundcount, (count+notfoundcount))
 
 
 if __name__ == '__main__':

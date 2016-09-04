@@ -8,6 +8,6 @@ if [ $# -eq 0 ]
         exit 0
 fi
 
-/usr/bin/time python2.7 jpeg_processor.py --newocr --noupload ../photos2/ sedgwick_map.json noupload_all2.csv 
-echo "CJK: ORIG OCR"
+#/usr/bin/time python2.7 jpeg_processor.py --newocr --noupload ../photos2/ sedgwick_map.json noupload_all2.csv 
+#echo "CJK: ORIG OCR"
 /usr/bin/time python2.7 jpeg_processor.py --noupload ../photos2/ sedgwick_map.json noupload_all2orig.csv 
