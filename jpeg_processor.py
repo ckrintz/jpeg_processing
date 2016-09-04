@@ -370,25 +370,26 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
             #wid_tag x len_tag
             err = False # no error
 	    try:
-	        if int(wid_tag) == 2560 and int(len_tag = 1920): #Windmill1, UpperRes no temp
+	        if int(wid_tag) == 2560 and int(len_tag) == 1920: #Windmill1, UpperRes no temp
 		    temp = -9998 #no temp
-	        elif int(wid_tag) == 3264 and int(len_tag = 2448): #Windmill1 2014, BoneT
+	        elif int(wid_tag) == 3264 and int(len_tag) == 2448: #Windmill1 2014, BoneT
                     temp = crop_and_recognize.run_c1(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_1/')
-	        elif int(wid_tag) == 1920 and int(len_tag = 1080): #main,lisque,fig,ne,vulture_pre16
+	        elif int(wid_tag) == 1920 and int(len_tag) == 1080: #main,lisque,fig,ne,vulture_pre16
                     temp = crop_and_recognize.run_c2(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_2/')
-	        elif int(wid_tag) == 3776 and int(len_tag = 2124): #boneH
+	        elif int(wid_tag) == 3776 and int(len_tag) == 2124: #boneH
                     temp = crop_and_recognize.run_c3(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_3/')
-	        elif int(wid_tag) == 2688 and int(len_tag = 1512): #vulture16
+	        elif int(wid_tag) == 2688 and int(len_tag) == 1512: #vulture16
 		    temp = -9997 #TBD rerun these when supported
 		    err = True #error
-	        elif int(wid_tag) == 2048 and int(len_tag = 1536): #windmillG,blue
+	        elif int(wid_tag) == 2048 and int(len_tag) == 1536: #windmillG,blue
 		    temp = -9997 #TBD rerun these when supported
 		    err = True #error
 	        else:
 		    print 'Error: unsupported OCR resolution: {0}x{1}'.format(wid_tag,len_tag)
 		    temp = -9996
 		    err = True #error
-	    except Exception e:
+            except Exception as e:
+		    print e
 		    print 'Error: OCR exception for: {0}x{1}'.format(wid_tag,len_tag)
 		    temp = -9995
 		    err = True #error
