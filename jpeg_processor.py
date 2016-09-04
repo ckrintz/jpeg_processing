@@ -84,6 +84,7 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
                         idx = 3
                     elif ele.startswith('MFDC'):
                         idx = 3
+			'''
 			#this is a new Vulture Trough camera, change the pictype from 2 to TBD
 			if 'Vulture Trough' in preflong:
 			    #pictype = TBD
@@ -92,10 +93,11 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
 			else: 
 			    print 'Error: cannot process this filename (MFDC): {0}'.format(fname)
 			    continue
+			'''
 		    else:
 		        idx = ele.rindex(' ') #xxx 500.JPG
                     photo_id = ele[idx+1:len(ele)-4]
-                    print 'PID: {0}, {1}'.format(ele, photo_id)
+                    #print 'PID: {0}, {1}'.format(ele, photo_id)
                     if printAll:
                         print 'processing {0}'.format(ele)
 
@@ -167,6 +169,8 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
     #get just the filename without the path
     orig_fname = fname[fname.rfind('/')+1:]
 
+    wid_tag = 0
+    len_tag = 0
     #set timer around processing the metadata from JPG file
     with timeblock('process_JPG ({0})'.format(fname)):
         stop_tag = 'Image DateTime'
@@ -176,10 +180,19 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
         fmsg = vars(tags[stop_tag])['printable']
         if 'Flash fired' in fmsg:
             flash = 'Flash'
+        stop_tag = 'EXIF ExifImageWidth'
+        wid_tag = vars(tags[stop_tag])['printable']
+        stop_tag = 'EXIF ExifImageLength'
+        len_tag = vars(tags[stop_tag])['printable']
+        #print 'Filename: {0}, datetime {1}, res {2}x{3}, pictype {4}'.format(fn,dt_tag,wid_tag,len_tag,pictype)
 
         #dt_tag: 2014:08:01 19:06:50
         d = (dt_tag.split()[0]).replace(':','-')
         t = dt_tag.split()[1]
+
+    if wid_tag ==0 or len_tag ==0:
+	print 'Error: JPG processing has failed for {0}'.format(fname)
+	sys.exit(1)
 
     day_folder = None  #set either from cache (fast) or by going to box (slow)
     day_folder_name = None  #set either from cache (fast) or by going to box (slow)
@@ -354,29 +367,37 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
             print 'OrigOCR: Temp is: {0}'.format(temp)
         else:
             print 'Using newocr, image name is: {0}'.format(fname)
+            #wid_tag x len_tag
             err = False # no error
-            try:
-                if pictype == 1:
+	    try:
+	        if int(wid_tag) == 2560 and int(len_tag = 1920): #Windmill1, UpperRes no temp
+		    temp = -9998 #no temp
+	        elif int(wid_tag) == 3264 and int(len_tag = 2448): #Windmill1 2014, BoneT
                     temp = crop_and_recognize.run_c1(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_1/')
-                elif pictype == 2:
+	        elif int(wid_tag) == 1920 and int(len_tag = 1080): #main,lisque,fig,ne,vulture_pre16
                     temp = crop_and_recognize.run_c2(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_2/')
-                elif pictype == 3:
+	        elif int(wid_tag) == 3776 and int(len_tag = 2124): #boneH
                     temp = crop_and_recognize.run_c3(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_3/')
-                else:
-		    print 'Error unknown pictype: {0}'.format(pictype)
-		    temp = -9999
-		    err = True
-            except Exception as e:
-                print e
-		print 'Error in call to crop_and_recognize: {0}, {1}'.format(pictype, fname)
-		temp = -9999
-		err = True #error
+	        elif int(wid_tag) == 2688 and int(len_tag = 1512): #vulture16
+		    temp = -9997 #TBD rerun these when supported
+		    err = True #error
+	        elif int(wid_tag) == 2048 and int(len_tag = 1536): #windmillG,blue
+		    temp = -9997 #TBD rerun these when supported
+		    err = True #error
+	        else:
+		    print 'Error: unsupported OCR resolution: {0}x{1}'.format(wid_tag,len_tag)
+		    temp = -9996
+		    err = True #error
+	    except Exception e:
+		    print 'Error: OCR exception for: {0}x{1}'.format(wid_tag,len_tag)
+		    temp = -9995
+		    err = True #error
             print "NewOCR: Temp is: {0}".format(temp)
 
     
     check_temp = err
-    if temp is None or temp == -9999:
-        print 'Error in OCR call'
+    if temp is None:
+        print 'Unknown Error in OCR call, temp is None'
         temp = -9999
         check_temp = True
 

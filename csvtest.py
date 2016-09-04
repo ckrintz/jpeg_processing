@@ -62,6 +62,9 @@ def main():
     namedict_count = len(namedict)
     count = 0
     notfoundcount = 0
+    if args.countonly:
+        for pref in prefix_dict:
+	    print pref
 
     print 'Starting directory search'
     #loop through files in directory, construct name, see if name is in the map
@@ -74,6 +77,12 @@ def main():
                         count += 1
 			if count % 100 == 0:
 			    print 'counting... {0}'.format(count)
+                        found = False
+		        for pref in prefix_dict:
+                            if pref in fname:
+				found = True
+			if not found:
+			    print 'not found: {0}'.format(fname)
 		        continue
                     if ele.startswith('IMAG'):
                         idx = 4
