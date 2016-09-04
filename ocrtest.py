@@ -32,7 +32,7 @@ def get_exif(fn,pictype):
     with open(fullfname, 'rb') as f:
         tags = exifread.process_file(f)
 	#uncomment this to see all of the keys in tags:
-	print 'All tags in jpeg metadata:\n{0}'.format(tags)
+	#print 'All tags in jpeg metadata:\n{0}'.format(tags)
         dt_tag = vars(tags[stop_tag])['printable']
         stop_tag = 'EXIF ExifImageLength'
         len_tag = vars(tags[stop_tag])['printable']
