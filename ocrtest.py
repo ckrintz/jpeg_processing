@@ -43,11 +43,11 @@ def get_exif(fn,pictype):
 	    if int(wid_tag) == 2560 and int(len_tag) == 1920: #Windmill1, UpperRes no temp
 		temp = -9998 #no temp
 	    elif int(wid_tag) == 3264 and int(len_tag) == 2448: #Windmill1 2014, BoneT
-                temp = crop_and_recognize.run_c1(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_1/')
+                temp = crop_and_recognize.run_c1(fullfname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_1/')
 	    elif int(wid_tag) == 1920 and int(len_tag) == 1080: #main,lisque,fig,ne,vulture_pre16
-                    temp = crop_and_recognize.run_c2(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_2/')
+                    temp = crop_and_recognize.run_c2(fullfname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_2/')
 	    elif int(wid_tag) == 3776 and int(len_tag) == 2124: #boneH
-                    temp = crop_and_recognize.run_c3(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_3/')
+                    temp = crop_and_recognize.run_c3(fullfname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_3/')
 	    elif int(wid_tag) == 2688 and int(len_tag) == 1512: #vulture16
 		    temp = -9997 #TBD rerun these when supported
 		    err = True #error
