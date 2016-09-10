@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 import dbiface
 import upload_files
 import tinys3
+import requests
+from contextlib import contextmanager
 try:
     from cStringIO import StringIO
 except:
@@ -16,6 +18,18 @@ except:
 DEBUG=False
 SEDGWICK='7411611121' #Shared Sedgwick Images Folder
 #SEDGWICK='0'
+
+######################## timer utility ############################
+@contextmanager
+def timeblock(label):
+    start = time.time() #time.process_time() available in python 3
+    try:
+        yield
+    finally:
+        end = time.time()
+        print ('{0} : {1:.10f} secs'.format(label, end - start))
+
+###################################################################
 
 ############## START generate eMammal CSVs -- see ../emammal/CJKREADME for sample ################
 def generate_emammal_Deployment(deployID): #only called once
@@ -68,10 +82,12 @@ def upload_file_to_s3(fname,bkt,s3key,s3secret,isText=False,fileIsString=None,pr
 		This is used if we are creating a file in memory (e.g. we downloaded it from Box without writing it to disk)
         Set isText to True if uploading a text file (csv/other)
     '''
+    if DEBUG:
+        print 'uploading {0} to s3 bkt {1}'.format(fname,bkt)
     # Creating a simple connection
-    conn = tinys3.Connection(s3key,s3secret)
+    conn = tinys3.Connection(s3key,s3secret,tls=True)
 
-    # Get the file object
+    # Get the file object withoug the prefix
     if fileIsString is None:
         f = open(fname,'rb')
     else:
@@ -81,31 +97,44 @@ def upload_file_to_s3(fname,bkt,s3key,s3secret,isText=False,fileIsString=None,pr
     if prefix:
         fname = '{0}/{1}'.format(prefix,fname)
 
-    try: 
-        # Upload the named file, writes to file called fname in the bucket potentially with a directory prefix
-        if isText: #assumes text
-            conn.upload(fname,f,bkt,content_type='text/plain')
-        else: #assumes JPEG
-            conn.upload(fname,f,bkt,content_type='image/jpeg')
-        print 'uploaded {0} successfully'.format(fname)
-    except:
-        time.sleep(5) #sleep for 5 seconds and try again
+    with timeblock('S3_list ({0})'.format(fname)):
+        try:
+            it = conn.list(fname,bkt)
+            if next(it,None) == None:
+                print 'fname not yet in s3: {0} in bkt {1}'.format(fname,bkt)
+	    else: 
+                print 'found fname already in s3: {0} in bkt {1}'.format(fname,bkt)
+	        return
+        except requests.exceptions.HTTPError as e:
+            print 'HTTPError on list test: {0}, uploading {1} (prefix {2}) to s3, isText? {3}'.format(e.response.status_code,fname,prefix,isText)
+    
+    with timeblock('S3_upload ({0})'.format(fname)):
         try: 
-            # Upload the named file 
+            # Upload the named file, writes to file called fname in the bucket potentially with a directory prefix
             if isText: #assumes text
                 conn.upload(fname,f,bkt,content_type='text/plain')
             else: #assumes JPEG
                 conn.upload(fname,f,bkt,content_type='image/jpeg')
             print 'uploaded {0} successfully'.format(fname)
         except:
-            print 'Unable to upload file {0}'.format(fname)
-            #write the file locally so that it can be uploaded manually via --uploadOnly
-	    #csv/text files are already written, just write jpegs if they come in as strings
-            if fileIsString is not None:
-                with open(fname,'wb') as f:
-		    f.write(fileIsString)
-                    print 'wrote {0} as a local file -> upload to s3 manually via'.format(fname)
-                    print 'python emammal.py --s3acc="AKXXX" --s3sec="xXXX" --s3bkt="bucketname" --uploadOnly="{0}"'.format(fname)
+            time.sleep(5) #sleep for 5 seconds and try again
+            try: 
+                # Upload the named file 
+                if isText: #assumes text
+                    conn.upload(fname,f,bkt,content_type='text/plain')
+                else: #assumes JPEG
+                    conn.upload(fname,f,bkt,content_type='image/jpeg')
+                print 'uploaded {0} successfully'.format(fname)
+            except Exception as e:
+	        print e
+                print 'Unable to upload file {0}'.format(fname)
+                #write the file locally so that it can be uploaded manually via --uploadOnly
+	        #csv/text files are already written, just write jpegs if they come in as strings
+                if fileIsString is not None:
+                    with open(fname,'wb') as f:
+		        f.write(fileIsString)
+                        print 'wrote {0} as a local file -> upload to s3 manually via'.format(fname)
+                        print 'python emammal.py --s3acc="AKXXX" --s3sec="xXXX" --s3bkt="bucketname" --uploadOnly="{0}"'.format(fname)
     
 
 def main():
@@ -332,6 +361,7 @@ def main():
                     first_in_series_tss,last_in_series_tss,
                     writeSequenceHeader)
         else:
+	    #there were no files for this month/day/year in box to copy to emammal
 	    print 'Error, no files came back for fname:{0}'.format(fname)
    	    continue  #go to next month
  
@@ -340,7 +370,7 @@ def main():
         for name in sorted(namelist):
             count += 1
 	    if DEBUG:
-                print '{0} {1}'.format(name,series[name],ids[name])
+                print 'Processing {0} series_name: {1} ids_name: {2}'.format(name,series[name],ids[name])
   	    #parse the current name (date time string)
 	    thissplit = name.split('_')
             ts = thissplit[1] + " " + thissplit[2]
