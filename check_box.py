@@ -74,7 +74,7 @@ def process_local_dir(fn,folder,csvFile,client,prefix,preflong,pictype,key,match
 		#check to see if it is in box, if not, print out the name to stdout (needs to be uploaded)
                 testing = True #don't upload it to box
 		if newfname not in matchlist:
-                    testing = not uploadIt  #upload if missing and uploadIt is True
+                    testing = not uploadIt  #upload (set testing to False) if missing and uploadIt is True
 		    print 'missing:{0}:{1}'.format(orig_fname,newfname)
                 #process the file and generate the CSV, only upload to box according to testing
 		jpeg_processor.process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,key,testing)
