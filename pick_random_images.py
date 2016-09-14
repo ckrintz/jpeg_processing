@@ -100,8 +100,9 @@ def main():
 
 
     '''The following reads in the file we just wrote and processes each file.  Modify this example to
-	process the file with TensorFlow.
+	process the file with TensorFlow. Uncomment to print out the sizes of each file listed in out_fname.
     '''
+    ''' 
     with open(args.out_fname,'r') as ifile:    
         for line in ifile: 
             #strip off the newline character
@@ -111,7 +112,7 @@ def main():
             #get the size of the file in bytes
             size = os.path.getsize(fname)
 	    print size
-    
+    '''
 ##################################
 if __name__ == '__main__':
     main()
