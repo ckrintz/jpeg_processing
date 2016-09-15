@@ -1,19 +1,27 @@
 '''Author: Chandra Krintz, UCSB, ckrintz@cs.ucsb.edu, AppScale BSD license'''
 
-import random,argparse,json,os,sys
+import random,argparse,json,os,sys,time
 import exifread
 from contextlib import contextmanager
 
 DEBUG = False
+total = 0
+count = 0
 ######################## timer utility ############################
 @contextmanager
 def timeblock(label):
+    global total,count
     start = time.time() #time.process_time() available in python 3
     try:
         yield
     finally:
         end = time.time()
-        print ('{0} : {1:.10f} secs'.format(label, end - start))
+        total += end-start
+        count += 1
+        if count % 100 == 0:
+            print 'Processed {0} images...'.format(count)
+        if DEBUG:
+            print ('{0} : {1:.10f} secs'.format(label, end - start))
 
 ######################## process_local_dir ############################
 def process_local_dir(fn,prefix,preflong,pictype):
@@ -22,9 +30,11 @@ def process_local_dir(fn,prefix,preflong,pictype):
         for ele in files:
             fname = os.path.join(root, ele) #full path name
             if ele.endswith(".JPG") and (preflong in fname):
+                hr = 10
 		#check that its day time
-                with open(fname, 'rb') as fjpeg:
-                    tags = exifread.process_file(fjpeg)
+                with timeblock('EXIF_JPEG'):
+                    with open(fname, 'rb') as fjpeg:
+                        tags = exifread.process_file(fjpeg)
                     stop_tag = 'Image DateTime'
                     dt_tag = vars(tags[stop_tag])['printable']
                     #dt_tag: 2014:08:01 19:06:50
@@ -34,10 +44,10 @@ def process_local_dir(fn,prefix,preflong,pictype):
 		    hr = int(t[0])
                     if DEBUG:
                         print 'HOUR: {0}'.format(hr)
-		    if hr >= 9 and hr <= 16:  #between 9am and 4pm, inclusive
-                        if DEBUG:
-                            print '\tAppending'
-		        lst.append(fname)
+		if hr >= 9 and hr <= 16:  #between 9am and 4pm, inclusive
+                    if DEBUG:
+                        print '\tAppending'
+		    lst.append(fname)
     return lst
 
 
@@ -97,6 +107,7 @@ def main():
             new_list = random.sample(the_list, args.count)
 	    for item in new_list:
 		ofile.write(item+'\n')
+    print 'Total time for running exif on all Main JPGs: {0}secs for {1} images = {2} secs per image'.format(total,count,float(total/count))
 
 
     '''The following reads in the file we just wrote and processes each file.  Modify this example to
