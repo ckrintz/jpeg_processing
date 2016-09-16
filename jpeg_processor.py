@@ -30,6 +30,7 @@ import upload_files
 import ocr,crop_and_recognize
 from boxsdk.exception import BoxAPIException
 from boxsdk.exception import BoxOAuthException
+import requests
 from requests.exceptions import ConnectionError
 import OpenSSL
 import urllib3
@@ -38,6 +39,7 @@ urllib3.disable_warnings()
 DEBUG = False
 fcache = {}
 newocr = False
+ocrsvc = '8080' #localhost port for ocr service - set on command line
 
 #timer utility
 @contextmanager
@@ -369,30 +371,53 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
             print 'Using newocr, image name is: {0}'.format(fname)
             #wid_tag x len_tag
             err = False # no error
-	    try:
-	        if int(wid_tag) == 2560 and int(len_tag) == 1920: #Windmill1, UpperRes no temp
-		    temp = -9998 #no temp
-	        elif int(wid_tag) == 3264 and int(len_tag) == 2448: #Windmill1 2014, BoneT
-                    temp = crop_and_recognize.run_c1(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_1/')
-	        elif int(wid_tag) == 1920 and int(len_tag) == 1080: #main,lisque,fig,ne,vulture_pre16
-                    temp = crop_and_recognize.run_c2(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_2/')
-	        elif int(wid_tag) == 3776 and int(len_tag) == 2124: #boneH
-                    temp = crop_and_recognize.run_c3(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_3/')
-	        elif int(wid_tag) == 2688 and int(len_tag) == 1512: #vulture16
-		    temp = -9997 #TBD rerun these when supported
+
+            if ocrsvc != '0000':
+                print 'Using newocr, image name is: {0}'.format(fname)
+                ocrurl = 'http://localhost:{0}/upload'.format(ocrsvc)
+                payload = {'files': fname, 'filename': newfname, 'pictype': pictype}
+                try:
+	            post_response = requests.post(url=ocrurl, data=payload)
+                    #resp = requests.post(url, files={'report.xls': open('report.xls', 'rb')})
+
+		    #curl -i -X POST -F files=@BoneT_2014-05-30_19-05-53_038.JPG --form "filename=temp.jpg" --form "pictype=1" http://169.231.235.107:5000/upload
+                    jresp = resp.json()
+		    print jresp, jresp['temperature']
+		    #temp = jresp['temperature']
+		except Exception as e:
+		    print e
+		    print 'Error: OCRSVC exception for: {0}x{1}'.format(wid_tag,len_tag)
+		    temp = -9995
 		    err = True #error
-	        elif int(wid_tag) == 2048 and int(len_tag) == 1536: #windmillG,blue
-		    temp = -9997 #TBD rerun these when supported
-		    err = True #error
-	        else:
-		    print 'Error: unsupported OCR resolution: {0}x{1}'.format(wid_tag,len_tag)
-		    temp = -9996
-		    err = True #error
-            except Exception as e:
+		sys.exit(1)
+
+            else:
+	        try:
+	            if int(wid_tag) == 2560 and int(len_tag) == 1920: #Windmill1, UpperRes no temp
+		        temp = -9998 #no temp
+	            elif int(wid_tag) == 3264 and int(len_tag) == 2448: #Windmill1 2014, BoneT
+                        temp = crop_and_recognize.run_c1(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_1/')
+	            elif int(wid_tag) == 1920 and int(len_tag) == 1080: #main,lisque,fig,ne,vulture_pre16
+                        temp = crop_and_recognize.run_c2(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_2/')
+	            elif int(wid_tag) == 3776 and int(len_tag) == 2124: #boneH
+                        temp = crop_and_recognize.run_c3(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_3/')
+	            elif int(wid_tag) == 2688 and int(len_tag) == 1512: #vulture16
+		        temp = -9997 #TBD rerun these when supported
+		        err = True #error
+	            elif int(wid_tag) == 2048 and int(len_tag) == 1536: #windmillG,blue
+		        temp = -9997 #TBD rerun these when supported
+		        err = True #error
+	            else:
+		        print 'Error: unsupported OCR resolution: {0}x{1}'.format(wid_tag,len_tag)
+		        temp = -9996
+		        err = True #error
+                except Exception as e:
 		    print e
 		    print 'Error: OCR exception for: {0}x{1}'.format(wid_tag,len_tag)
 		    temp = -9995
 		    err = True #error
+
+
             print "NewOCR: Temp is: {0}".format(temp)
 
     
@@ -418,7 +443,7 @@ def writeIntro(csvFile):
 
 
 def main():
-    global newocr
+    global newocr,ocrservice
     logging.basicConfig()
     parser = argparse.ArgumentParser(description='JPEG Processing')
     #required arguments
@@ -430,10 +455,14 @@ def main():
     #optional arguments
     parser.add_argument('--debug',action='store',default=False,type=bool,help='Turn debugging on')
     parser.add_argument('--newocr',action='store_true',default=False,help='Use Andys OCR')
+    parser.add_argument('--ocrservice',action='store',default='0000',help='OCR service port# (e.g. 8080, localhost assumed), --newocr must also be set')
     parser.add_argument('--noupload',action='store_true',default=False,help='Turn uploading to box off')
     args = parser.parse_args()
     testing = args.noupload
     newocr = args.newocr
+    ocrsvc = args.ocrservice
+    if ocrsvc != '0000' and not newocr:
+        print 'Error, you must use both --newocr and --ocrservice=8080 (port#) to use the new ocr service implementation'
 
     #read in the map
     with open(args.map,'r') as map_file:    
