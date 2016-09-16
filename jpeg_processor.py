@@ -73,12 +73,16 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
             for ele in files:
                 fname = os.path.join(root, ele) #full path name
                 #if ele.endswith(".JPG"):
-                if ele.endswith(".JPG") and (preflong in fname):
+                if (ele.endswith(".JPG") or ele.endswith('.jpg')) and (preflong in fname):
                     #extract the photo ID from the file name
 		    #filenames are IMAG0ID.JPG, IMG_ID.JPG, RCNXID.JPG for each different camera
                     if printAll:
 		        print 'ele: {0}'.format(ele)
-                    if ele.startswith('IMAG'):
+		    photo_id = None
+                    if preflong.startswith('testdir'):
+                        photo_id = 100 #testing purposes only
+		        print 'photo_id for testing = 100'
+                    elif ele.startswith('IMAG'):
                         idx = 4
                     elif ele.startswith('IMG_'):
                         idx = 3
@@ -98,7 +102,8 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
 			'''
 		    else:
 		        idx = ele.rindex(' ') #xxx 500.JPG
-                    photo_id = ele[idx+1:len(ele)-4]
+		    if not photo_id:
+                        photo_id = ele[idx+1:len(ele)-4]
                     #print 'PID: {0}, {1}'.format(ele, photo_id)
                     if printAll:
                         print 'processing {0}'.format(ele)
@@ -133,13 +138,13 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
                 try:
                     process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,key,printAll)
                 except Exception as e:
-   		    #try again
+   	     #try again
                     process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,key,printAll)
                 except ConnectionError as e:
                     #try to get a new client and try again
                     client = upload_files.setup()
                     process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,key,printAll)
-		    #will just throw an exception and terminate the execution if there is an issue at this point
+	     #will just throw an exception and terminate the execution if there is an issue at this point
         if printAll:
             for tag in tags.keys():
                 if tag not in ('JPEGThumbnail', 'TIFFThumbnail'):
@@ -373,23 +378,26 @@ def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,k
             err = False # no error
 
             if ocrsvc != '0000':
-                print 'Using newocr, image name is: {0}'.format(fname)
+                print 'Using newocr service, image name is: {0}'.format(fname)
                 ocrurl = 'http://localhost:{0}/upload'.format(ocrsvc)
-                payload = {'files': fname, 'filename': newfname, 'pictype': pictype}
+		payload = {'filename': 'temp.jpg', 'pictype': '2'}
+                #ocrurl = 'http://localhost:{0}/upload?filename={1}&pictype={2}'.format(ocrsvc,'temp.jpg',pictype)
                 try:
-	            post_response = requests.post(url=ocrurl, data=payload)
-                    #resp = requests.post(url, files={'report.xls': open('report.xls', 'rb')})
-
-		    #curl -i -X POST -F files=@BoneT_2014-05-30_19-05-53_038.JPG --form "filename=temp.jpg" --form "pictype=1" http://169.231.235.107:5000/upload
-                    jresp = resp.json()
-		    print jresp, jresp['temperature']
-		    #temp = jresp['temperature']
+                    files = {'files': open(fname, 'rb')}
+                    resp = requests.post(ocrurl, files=files, data=payload)
+                    if resp.status_code == 200:
+                        jresp = resp.json()
+		        temp = jresp['temperature']
+		        if temp < -9990:
+		            print 'Error: OCRSVC returned bad temp: {0}x{1}: {2}'.format(wid_tag,len_tag,temp)
+		    else:
+		        print 'Error: OCRSVC bad status code for: {0}x{1}: {2}'.format(wid_tag,len_tag,resp.status_code)
+			
 		except Exception as e:
 		    print e
 		    print 'Error: OCRSVC exception for: {0}x{1}'.format(wid_tag,len_tag)
 		    temp = -9995
 		    err = True #error
-		sys.exit(1)
 
             else:
 	        try:
@@ -443,7 +451,7 @@ def writeIntro(csvFile):
 
 
 def main():
-    global newocr,ocrservice
+    global newocr,ocrsvc
     logging.basicConfig()
     parser = argparse.ArgumentParser(description='JPEG Processing')
     #required arguments

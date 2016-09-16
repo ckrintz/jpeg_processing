@@ -8,7 +8,11 @@ if [ $# -eq 0 ]
         exit 0
 fi
 
+#echo "CJK: OCR as a service"
+###/usr/bin/time python2.7 jpeg_processor.py --noupload --newocr --ocrservice 8080 ../photos2/ main_map.json noupload_mainNew2.csv
+/usr/bin/time python2.7 jpeg_processor.py --noupload --newocr --ocrservice 8080 ../photos2/ main_map.json noupload_mainNew2.csv
 #/usr/bin/time python2.7 jpeg_processor.py --newocr --noupload ../photos2/ sedgwick_map.json noupload_all2.csv 
-/usr/bin/time python2.7 jpeg_processor.py --newocr --noupload ../photos2/ main_map.json noupload_mainNew.csv 
+#echo "CJK: NEW OCR"
+#/usr/bin/time python2.7 jpeg_processor.py --newocr --noupload ../photos2/ main_map.json noupload_mainNew.csv 
 #echo "CJK: ORIG OCR"
 #/usr/bin/time python2.7 jpeg_processor.py --noupload ../photos2/ sedgwick_map.json noupload_all2orig.csv 

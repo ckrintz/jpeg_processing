@@ -3,8 +3,10 @@
 import random,argparse,json,os,sys,time,exifread
 from contextlib import contextmanager
 from shutil import copyfile
+import subprocess
 
 DEBUG = False
+local = False
 ######################## timer utility ############################
 @contextmanager
 def timeblock(label):
@@ -47,14 +49,19 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
 		    continue
                 size += os.path.getsize(fname)
 		count += 1
-                copyfile(fname, newfname)
+		if local:
+                    copyfile(fname, newfname) #works locally
+
+		#/research/ckrintz/tools/bbcp/bin/amd64_linux26/bbcp -z -r -P 2 -V -w 8m -s 16 /research/ckrintz/sedgwick/photos2/ 169.231.235.47:/mnt/sedgwick/photos/
+		#../../tools/bbcp/bin/amd64_linux26/bbcp -z -r -P 2 -V -w 8m -s 16 /research/ckrintz/sedgwick/jpeg_processing/test.jpg 169.231.235.47:/mnt/sedgwick/photos
+
 		
     return size,count
 
 
 ######################## main ############################
 def main():
-    global DEBUG
+    global DEBUG,local
     parser = argparse.ArgumentParser(description='Find all of the pictures under each camera prefix is map and count them')
     parser.add_argument('srcdir',action='store',help='Directory')
     parser.add_argument('destdir',action='store',help='Directory')
@@ -64,8 +71,10 @@ def main():
 
     #optional arguments
     parser.add_argument('--debug',action='store_true',default=False,help='Turn debugging on (default: off)')
+    parser.add_argument('--local',action='store_true',default=False,help='destdir is local (default)')
     args = parser.parse_args()
     DEBUG = args.debug
+    local = args.local
 
     #read in the map
     with open(args.map,'r') as map_file:    
