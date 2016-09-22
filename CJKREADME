@@ -1,0 +1,140 @@
+===============================
+TODO: 
+checkbox: remove windmill dirs, rerun both and upper res (updated sedgwick_map.json)
+runocr.sh: andy's when all fixed
+===============================
+python2.7 csvtest.py noupload_all2.csv ../photos2/ sedgwick_map.json >& grot
+Name_dict_count: 1079451, found: 1079450, notfound: 9228, f+nf: 1088678
+correct:
+Name_dict_count: 1079451, found: 1121321, notfound: 0, f+nf: 1121321
+Upper Reserve 1
+	../photos2/.../Upper Reserve 1 (7-20-2016 to 8-13-2016)/Upper Reserve 1 7-20-2016 to 7-24-2016/100HCOIM/IMAG0026.JPG
+	HCO Scoutguard python2.7 ocrtest.py 2 testimages/
+	2560x1920
+	no temperature
+Error, missing fname: Vulture_2016-05-27_22:54:18_0564.JPG
+Error, missing3 fname (no prefix match): ../photos2/2015 - 2016 Sedgwick Pictures/Windmill Canyon 1 (4-03-2015 to 12-29-2015)/Windmill Canyon 1 11-06-2015 to 12-08-2015/100HCOIM/IMAG0091.JPG
+Error, missing3 fname (no prefix match): ../photos2/2015 - 2016 Sedgwick Pictures/Windmill Canyon 1 (4-03-2015 to 12-29-2015)/Windmill Canyon 1 11-06-2015 to 12-08-2015/100HCOIM/IMAG0630.JPG
+===============================
+runocrtest.sh
+
+
+OCR
+select pictype based on resolution
+3264x2448	1
+	windmill 1 2014 (broken - throws exception)
+	boneT works (broken - wrong temp returned)
+1920x1080	2
+	main works
+	lisque works
+	figueroa works
+	northeast works
+	vulture works
+3776x2124	3
+	boneH works
+2688x1512	?TBD
+	vulture 2016 (moutrie) not supported
+2048x1536	?TBD - using 2 which seems to work for now
+	windmill game (Reconyx HC500) not supported
+	blue (Reconyx HC600) not supported
+2560x1920	no temp (don't call OCR on this)
+	windmill 1 2015 - no temp
+	upper reserve - no temp
+
+-----------------------------
+
+notsupportedyet
+2048x1536
+	Reconyx HC500,HC600
+	Windmill Canyon Game
+	Blue
+
+2688x1512
+	Reconyx
+	Vulture 2016
+	
+	
+
+
+    "Lisque":["7413964473","Lisque Mesa 1","2"],
+	1920x1080: Lisque (Reconyx)
+	works
+    "Figueroa":["7413966585","Figueroa Creek","2"],
+	1920x1080: Figcreek (Reconyx HC600)
+	works
+    "Windmill":["7413968941","Windmill Canyon 1","1"],
+	Windmill/1 from 2015 (2560x1920) have no temp - HCO Scoutguard
+		works  (returns -9999)
+	Windmill/1 from 2014 (3264x2448) has a temp (Bushnell)
+		doesn't work: causes exception: IndexError: list index out of range
+		location of digit is not the same as Bone/Trough b/c of the string name ahead of the temp
+		once cropped correctly, the learning should be the same as Bone/Trough though
+    "Windmill":["7413968941","Windmill Canyon Game","2"],
+	2048x1536: Windmill/Game (Reconyx HC500)
+	doesn't work: returns -9999
+		same as Blue?
+    "Main":["7413970457","Main Road Water Hole","2"],
+	1920x1080: Main (Reconyx HC500)
+	works
+    "BoneT":["7413971853","Bone Canyon Water Trough","1"],
+	3264x2448: Bone/Trough (Bushnell)
+	works
+    "BoneH":["7413971853","Bone Canyon Water Hole","3"],
+	3776x2124: Bone/Hole (Reconyx)
+	works
+    "Northeast":["7413973301","Northeast Corner Spring","2"],
+	1920x1080: Northeast (Reconyx HC600)
+	works
+    "Vulture":["7413975069","Vulture Trough","2"],
+	1920x1080: Vulture (Reconyx)
+	2014 works
+	2016 doesn't work: 2688x1512 (Moultrie) 
+    "Blue":["7413976713","Blue Schist Water Hole","2"]
+	2048x1536: Blue (Reconyx HC600)
+	doesn't work: returns -9999
+		same as Windmill Canyon Game?
+-----------------------------
+test
+python2.7 jpeg_processor.py --newocr --noupload ./emammal/ sedgwick_map.json test.csv
+
+run
+nohup python2.7 jpeg_processor.py --newocr --noupload ../photos2/ sedgwick_map.json noupload_all2.csv >& jpp_noupload.out &
+
+Andy's files:
+full path to training data: ocr_knn/flask_ocr/backend/data/data_files/camera*
+numbers and prefixes are reversed right? 1=c3, 2=c2, 3=c1
+crop.py has no main -- but is imported to other files as a module
+	comment out: ocr_knn/initial_tasks/task3/crop.py 
+	or put in main, if not its executed directly
+crop_and_recognize.py -- for all calls to crop_image, add the lowercase jpg extension
+    crop.crop_image(image, "temp/digits", 1710, 0, 115, 30) #crops digits
+    crop.crop_image(image, "temp/digits.jpg", 1710, 0, 115, 30) #crops digits
+
+usage:
+EXPORT PYTHONPATH=.:ocr_knn/initial_tasks/task3
+import crop_and_recognize 
+   call:
+            print "Using newocr, image name is: {0}".format(fname)
+            if pictype == 1:
+                temp = crop_and_recognize.run_c3(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_3/')
+            if pictype == 2:
+                temp = crop_and_recognize.run_c2(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_2/')
+            if pictype == 3:
+                temp = crop_and_recognize.run_c1(fname, 'ocr_knn/flask_ocr/backend/data/data_files/camera_1/')
+            print "Temp is: {0}".format(temp)
+
+
+--------------------------------------
+pictype 1: 2048x1536: Windmill/1,Bone/Trough
+	Windmill/1 from 2015 (2560x1920) have no temp - HCO Scoutguard
+		works  (returns -9999)
+	Windmill/1 from 2014 (3264x2448) has a temp (Bushnell)
+		doesn't work: causes exception: IndexError: list index out of range
+		location of digit is not the same as Bone/Trough b/c of the string name ahead of the temp
+		once cropped correctly, the learning should be the same as Bone/Trough though
+	Bone/Trough (3264x2448) Bushnell
+		works
+pictype 2: 1920x1080: Main,Lisque,Fig,Windmill/Game,Northeast (HC500 Hyperfire)
+	2048x1536: Blue (HC600 Hyperfire)
+	1920x1080: Vulture (Reconyx)
+pictype 3: Bone/Hole (Reconyx)

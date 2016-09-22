@@ -40,6 +40,7 @@ DEBUG = False
 fcache = {}
 newocr = False
 ocrsvc = '8080' #localhost port for ocr service - set on command line
+imglist = None
 
 #timer utility
 @contextmanager
@@ -76,8 +77,6 @@ def get_exif(fn,folder,csvFile,client,prefix,preflong,pictype,key,printAll=False
                 if (ele.endswith(".JPG") or ele.endswith('.jpg')) and (preflong in fname):
                     #extract the photo ID from the file name
 		    #filenames are IMAG0ID.JPG, IMG_ID.JPG, RCNXID.JPG for each different camera
-                    if printAll:
-		        print 'ele: {0}'.format(ele)
 		    photo_id = None
                     if preflong.startswith('testdir'):
                         photo_id = 100 #testing purposes only
@@ -172,6 +171,12 @@ def validation_problem(folder, fileName):
 def process_jpeg_file(tags,fname,csvFile,folder,prefix,client,pictype,photo_id,key,testing=False):
     #fname is full path and file name, key is the name of the entry in the map (sedgwick_map.json)
     #testing=True skips the box file upload step
+
+    #check that fname is in img list, only process it if it is
+    if imglist:
+        if fname in imglist:
+            print 'found a file to process: {0}'.format(fname)
+        return
 
     #get just the filename without the path
     orig_fname = fname[fname.rfind('/')+1:]
@@ -451,7 +456,7 @@ def writeIntro(csvFile):
 
 
 def main():
-    global newocr,ocrsvc
+    global newocr,ocrsvc,imglist
     logging.basicConfig()
     parser = argparse.ArgumentParser(description='JPEG Processing')
     #required arguments
@@ -464,13 +469,20 @@ def main():
     parser.add_argument('--debug',action='store',default=False,type=bool,help='Turn debugging on')
     parser.add_argument('--newocr',action='store_true',default=False,help='Use Andys OCR')
     parser.add_argument('--ocrservice',action='store',default='0000',help='OCR service port# (e.g. 8080, localhost assumed), --newocr must also be set')
+    parser.add_argument('--checklist',action='store',default=None,help='only processed files with names in this list')
     parser.add_argument('--noupload',action='store_true',default=False,help='Turn uploading to box off')
     args = parser.parse_args()
     testing = args.noupload
+    if args.checklist:
+        imglist = []
+        with open(args.checklist,'r') as f:    
+            for img in f:
+                imglist.append(img.strip())
     newocr = args.newocr
     ocrsvc = args.ocrservice
     if ocrsvc != '0000' and not newocr:
         print 'Error, you must use both --newocr and --ocrservice=8080 (port#) to use the new ocr service implementation'
+ 
 
     #read in the map
     with open(args.map,'r') as map_file:    

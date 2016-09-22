@@ -5,8 +5,10 @@ import exifread
 from contextlib import contextmanager
 
 DEBUG = False
+skip = False
 total = 0
 count = 0
+daycount = 0
 ######################## timer utility ############################
 @contextmanager
 def timeblock(label):
@@ -25,6 +27,7 @@ def timeblock(label):
 
 ######################## process_local_dir ############################
 def process_local_dir(fn,prefix,preflong,pictype):
+    global daycount
     lst = []
     for root, subFolders, files in os.walk(fn):
         for ele in files:
@@ -47,13 +50,15 @@ def process_local_dir(fn,prefix,preflong,pictype):
 		if hr >= 9 and hr <= 16:  #between 9am and 4pm, inclusive
                     if DEBUG:
                         print '\tAppending'
-		    lst.append(fname)
+		    if not skip:
+                        lst.append(fname)
+		    daycount += 1
     return lst
 
 
 ######################## main ############################
 def main():
-    global DEBUG
+    global DEBUG,skip
     parser = argparse.ArgumentParser(description='Find all of the pictures under each camera prefix is map and count them')
     parser.add_argument('imgdir',action='store',help='Directory')
     parser.add_argument('map',action='store',help='json map filename with Box directories to check')
@@ -72,9 +77,11 @@ def main():
 
     #optional arguments
     parser.add_argument('--count',action='store',default=10000,help='number of images to return')
+    parser.add_argument('--skip',action='store_true',default=False,help='set to skip the picking, ocount only')
     parser.add_argument('--debug',action='store_true',default=False,help='Turn debugging on (default: off)')
     args = parser.parse_args()
     DEBUG = args.debug
+    skip = args.skip
 
     #read in the map
     with open(args.map,'r') as map_file:    
@@ -104,10 +111,12 @@ def main():
 
 	    #get the list containing the full_filename for this map key (camera location)
             the_list = process_local_dir(args.imgdir,prefix,full_prefix,pictype)
-            new_list = random.sample(the_list, args.count)
-	    for item in new_list:
-		ofile.write(item+'\n')
+            if not skip:
+                new_list = random.sample(the_list, args.count)
+	        for item in new_list:
+		    ofile.write(item+'\n')
     print 'Total time for running exif on all Main JPGs: {0}secs for {1} images = {2} secs per image'.format(total,count,float(total/count))
+    print 'Total count of day images: {0}'.format(daycount)
 
 
     '''The following reads in the file we just wrote and processes each file.  Modify this example to

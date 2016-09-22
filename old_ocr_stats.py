@@ -1,6 +1,6 @@
 '''Author: Chandra Krintz, UCSB, ckrintz@cs.ucsb.edu, AppScale BSD license'''
 '''USAGE:'''
-'''grep 'OrigOCR\|process_JPG\|perform_OCR' old_ocr_main.out > grot'''
+'''grep 'NewOCR\|OrigOCR\|process_JPG\|perform_OCR' old_ocr_main.out > grot'''
 '''python2.7 old_ocr_stats.py --debug grot > out'''
 '''old_ocr_main.out are the Main entries from runocr.sh/jpeg_processor.py runocr.out output file'''
 
@@ -19,8 +19,6 @@ def process(img_dir_prefix,lst,ocr_list,newocr):
 
     #...
     #process_JPG (../photos2/2016 Sedgwick Pictures (8-24-2016 Monthly Update)/Main Road Water Hole (6-27-2016 to 8-10-2016)/Main Road Water Hole 6-27-2016 to 7-10-2016/100RECNX/IMG_7941.JPG) : 0.0000169277 secs
-    #process_jpeg: skipping upload for testing purposes
-    #Using newocr, image name is: ../photos2/2016 Sedgwick Pictures (8-24-2016 Monthly Update)/Main Road Water Hole (6-27-2016 to 8-10-2016)/Main Road Water Hole 6-27-2016 to 7-10-2016/100RECNX/IMG_7941.JPG
     #NewOCR: Temp is: 74
     #perform_OCR : 0.3260560036 secs
 
@@ -38,10 +36,9 @@ def process(img_dir_prefix,lst,ocr_list,newocr):
 
     rlist = list(reversed(lst))
     if DEBUG:
-	if newocr:
-            print 'rlist:\n{0} {1} {2}'.format(rlist[0],rlist[1],rlist[4])
-        else:
-            print 'rlist:\n{0} {1} {2}'.format(rlist[0],rlist[1],rlist[3])
+        print 'rlist: {0}'.format(rlist)
+	#rlist: ['perform_OCR : 0.3612451553 secs\n', 'process_JPG (../photos2/2016 Sedgwick Pictures (8-24-2016 Monthly Update)/Main Road Water Hole (6-27-2016 to 8-10-2016)/Main Road Water Hole 6-27-2016 to 7-10-2016/100RECNX/IMG_9305.JPG) : 0.0000138283 secs\n']
+
     #verify rlist[0] startsWith 'perform_OCR'
     if not rlist[0].startswith('perform_OCR'):
         print 'error, ele should be perform_OCR line: {0}'.format(rlist[0])
@@ -56,9 +53,9 @@ def process(img_dir_prefix,lst,ocr_list,newocr):
     except ValueError as e:
         pass
     
-    #skip rlist[2] and rlist[3] if newocr
+    #skip rlist[2] if not newocr
     if newocr:
-        idx = 4
+        idx = 2
     else: 
         idx = 3
     ele = rlist[idx].split(':')#process_JPG fname_in_parens : val secs
