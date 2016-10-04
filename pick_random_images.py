@@ -44,6 +44,8 @@ def process_local_dir(fn,prefix,preflong,pictype):
                     #t: 19:06:50
                     t = dt_tag.split()[1]
 		    t = t.split(':')
+
+                    print 'CJK;{0};{1}'.format(dt_tag,fname)
 		    hr = int(t[0])
                     if DEBUG:
                         print 'HOUR: {0}'.format(hr)
