@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from contextlib import contextmanager
 from shutil import copyfile
 import exifread
-import subprocess
+import cv2
 
 DEBUG = False
 local = False
@@ -60,9 +60,22 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
 		    fn = fn.replace('(','\(')
 		    fn = fn.replace(')','\)')
 		    cmd = 'rsync -az {0} root@169.231.235.115:/tmp/{1}'.format(fn,newfname)
+		    os.system(cmd)
+
+		    #make thumbnail 300 pixels wide
+		    image = cv2.imread(fname)
+		    r = 300.0/image.shape[1] #shape: rows,cols,channels, so width is index 1
+		    dim = (300, int(image.shape[0] *r)) #height is index 0
+		    resized = cv2.resize(image,dim,interpolation=cv2.INTER_AREA)
+		    fnsmall = 'tmp111.jpg'
+		    cv2.imwrite(fnsmall,resized)
+		    nfn = newfname.replace('.jpg','_t.jpg')
+		    cmd = 'rsync -az {0} root@169.231.235.115:/tmp/{1}'.format(fnsmall,nfn)
+		    os.system(cmd)
 		    if DEBUG:
 			print 'command: {0} {1} {2}'.format(cmd,fn,newfname)
-		    os.system(cmd)
+			print 'command: {0} {1}'.format(fnsmall,newfn)
+		    sys.exit(1)
 
     return size,count
 
