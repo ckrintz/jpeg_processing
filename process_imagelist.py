@@ -56,7 +56,7 @@ def main():
         daypics = 0
 	daypics_size = 0
         totalpics = 0
-	totalpics_size = 0
+	totalsize = 0
         days_with_images = {}
         #process the file
         with open(args.fname,'r') as f:    
@@ -66,7 +66,7 @@ def main():
                 full_prefix = val[1] #used to check if a file belongs to this folder/key
                 if eles[0] == 'CJK':
                     #CJK;2015:11:08 23:08:55;1417293;../photos2/2015 - 2016 Sedgwick Pictures/Windmill Canyon 1 (4-03-2015 to 12-29-2015)/Windmill Canyon 1 11-06-2015 to 12-08-2015/100HCOIM/IMAG0091.JPG
-                    if full_prefix in eles[2]: # this entry is an image from this key's camera
+                    if full_prefix in eles[3]: # this entry is an image from this key's camera
 	                dtime = datetime.strptime(eles[1], '%Y:%m:%d %H:%M:%S')
 			days_with_images[dtime.date()] = 1
 			starttime = datetime.strptime('2016:08:01 09:00:00','%Y:%m:%d %H:%M:%S')

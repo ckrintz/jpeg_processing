@@ -4,15 +4,14 @@ import json, sys, argparse, csv, logging, os, time
 import exifread
 from datetime import datetime, timedelta
 from contextlib import contextmanager
-from boxsdk.exception import BoxAPIException
-from boxsdk.exception import BoxOAuthException
-from requests.exceptions import ConnectionError
 import OpenSSL
 import urllib3
 urllib3.disable_warnings()
 import upload_files, jpeg_processor, ocr
 
 DEBUG = False
+sum_sz = {}
+sum_cnt = {}
 ######################## timer utility ############################
 @contextmanager
 def timeblock(label):
@@ -26,13 +25,28 @@ def timeblock(label):
 ######################## process_local_dir ############################
 def process_local_dir(fn,prefix,preflong,pictype):
     size = 0
+    sz = 0
     count = 0
     for root, subFolders, files in os.walk(fn):
         for ele in files:
             fname = os.path.join(root, ele) #full path name
             if ele.endswith(".JPG") and (preflong in fname):
-                size += os.path.getsize(fname)
+                sz = os.path.getsize(fname)
+                size += sz
 		count += 1
+                with open(fname, 'rb') as fjpeg:
+                    tags = exifread.process_file(fjpeg)
+                stop_tag = 'Image DateTime'
+                dt_tag = vars(tags[stop_tag])['printable']
+                #dt_tag: 2014:08:01 19:06:50
+                dt = datetime.strptime(dt_tag.split()[0], "%Y:%m:%d")
+                pref = '{0}{1}'.format(dt.year,dt.month)
+		if pref in sum_sz:
+                    sum_sz[pref] += sz
+                    sum_cnt[pref] += 1
+		else: 
+                    sum_sz[pref] = sz
+                    sum_cnt[pref] = 1
     return size,count
 
 
@@ -82,6 +96,8 @@ def main():
         szsum += sz
         cntsum += cnt
     print 'TOTAL: size_in_KB: {0} count: {1} avgsize_in_KB: {2}'.format(szsum/1024,cntsum,(szsum/cntsum)/1024)
+    for key in sum_sz:
+        print '{0}: sz={1} count={2}'.format(key,sum_sz[key],sum_cnt[key])
 
 ##################################
 if __name__ == '__main__':

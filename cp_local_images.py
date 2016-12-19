@@ -1,8 +1,10 @@
 '''Author: Chandra Krintz, UCSB, ckrintz@cs.ucsb.edu, AppScale BSD license'''
 
 import random,argparse,json,os,sys,time,exifread
+from datetime import datetime, timedelta
 from contextlib import contextmanager
 from shutil import copyfile
+import exifread
 import subprocess
 
 DEBUG = False
@@ -43,7 +45,9 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
                 #dt_tag: 2014:08:01 19:06:50
                 d = (dt_tag.split()[0]).replace(':','-')
                 t = dt_tag.split()[1]
-                newfname = '{0}/{1}_{2}_{3}_{4}.JPG'.format(destdir,prefix,d,t,photo_id)
+		#directory name YYYYMM
+                ddir = datetime.strptime(dt_tag.split()[0], "%Y:%m:%d").strftime('%Y%m')
+                newfname = '{0}_{1}_{2}_{3}.jpg'.format(prefix,d,t,photo_id)
 		if os.path.exists(newfname):
                     print '{0} exists! not overwriting'
 		    continue
@@ -51,11 +55,15 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
 		count += 1
 		if local:
                     copyfile(fname, newfname) #works locally
+		else: 
+		    fn = fname.replace(' ','\ ')
+		    fn = fn.replace('(','\(')
+		    fn = fn.replace(')','\)')
+		    cmd = 'rsync -az {0} root@169.231.235.115:/tmp/{1}'.format(fn,newfname)
+		    if DEBUG:
+			print 'command: {0} {1} {2}'.format(cmd,fn,newfname)
+		    os.system(cmd)
 
-		#/research/ckrintz/tools/bbcp/bin/amd64_linux26/bbcp -z -r -P 2 -V -w 8m -s 16 /research/ckrintz/sedgwick/photos2/ 169.231.235.47:/mnt/sedgwick/photos/
-		#../../tools/bbcp/bin/amd64_linux26/bbcp -z -r -P 2 -V -w 8m -s 16 /research/ckrintz/sedgwick/jpeg_processing/test.jpg 169.231.235.47:/mnt/sedgwick/photos
-
-		
     return size,count
 
 
@@ -71,7 +79,7 @@ def main():
 
     #optional arguments
     parser.add_argument('--debug',action='store_true',default=False,help='Turn debugging on (default: off)')
-    parser.add_argument('--local',action='store_true',default=False,help='destdir is local (default)')
+    parser.add_argument('--local',action='store_true',default=False,help='if False (default), nothing is copied... only counting is performed')
     args = parser.parse_args()
     DEBUG = args.debug
     local = args.local
