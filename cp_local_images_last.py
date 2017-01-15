@@ -24,8 +24,7 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
     size = 0
     count = 0
     tries = 0
-    #rootstr = 'root@169.231.235.115:/opt/sedgwick/images/'
-    rootstr = 'root@169.231.235.115:/opt2/sedgwick/images/'
+    rootstr = 'root@169.231.235.115:/opt/sedgwick/images/'
     for root, subFolders, files in os.walk(srcdir):
         for ele in files:
             fname = os.path.join(root, ele) #full path name
@@ -60,25 +59,16 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
 		#if not yr == '2013' and not yr == '2014':
                     #continue
 		#2015 01-10 goest to /opt
-		#if not yr == '2015':
-                    #continue
-		#else: 
-                    ##print 'year is 15: {0} month is: {1}'.format(yr,mo)
-		    #if not mo.startswith('0'):
-		        ##starts with a 1
-		        #if not mo == '10':
-                            #continue
-                #print 'FOUND ONE year is 15: {0} month is: {1}'.format(yr,mo)
-
-		#2015 11,12 and 2016 goest to /opt2
-		if not yr == '2015' and not yr == '2016':
+		if not yr == '2015':
                     continue
-		else: #2015 or #2016 
-		    if yr == '2015' and mo.startswith('1'):
-		        ##starts with a 1
-		        if mo == '10':
-                            continue #we only want 11 and 12
-                #print 'FOUND ONE year is 15 or 16: {0} month is 11 or 12: {1}'.format(yr,mo)
+		else: 
+                    #print 'year is 15: {0} month is: {1}'.format(yr,mo)
+		    if not mo.startswith('0'):
+		        #starts with a 1
+		        if not mo == '10':
+                            continue
+                #print 'FOUND ONE year is 15: {0} month is: {1}'.format(yr,mo)
+		#2015 11,12 and 2016 goest to /opt2
 
 		if os.path.exists(newfname):
                     print '{0} exists! not overwriting'
