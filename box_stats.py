@@ -1,5 +1,6 @@
 '''Author: Chandra Krintz, UCSB, ckrintz@cs.ucsb.edu, AppScale BSD license'''
 '''USAGE:'''
+'''generate output file grot from check_box.py'''
 '''grep 'skipping\|upload_\|perform_OCR' main.out > grot'''
 '''python2.7 box_stats.py --debug grot > out'''
 
