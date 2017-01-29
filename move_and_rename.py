@@ -23,8 +23,8 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
     size = 0
     count = 0
     tries = 0
-    #rootstr = 'root@169.231.235.115:/opt/sedgwick/images/'
-    rootstr = 'root@169.231.235.115:/opt2/sedgwick/images/'
+    #rootstr = 'root@169.231.235.52:/opt/sedgwick/images/'
+    rootstr = 'root@169.231.235.52:/opt2/sedgwick/images/'
     for root, subFolders, files in os.walk(srcdir):
         for ele in files:
             fname = os.path.join(root, ele) #full path name

@@ -33,7 +33,7 @@ def main():
     fname=args.fname
     printCSV=args.printcsv
     copyThem=args.copy
-    rootstr = 'root@169.231.235.115:/opt2/sedgwick/images/'
+    rootstr = 'root@169.231.235.52:/opt2/sedgwick/images/'
     count = 0
     size = 0
 
@@ -95,7 +95,7 @@ def main():
 		        #start 19
 		        boxfileID = 5000
 
-            newfname = 'Main_{0}_{1}_{2}_{3}.JPG'.format(d,t,photo_id,box_name_string)
+            newfname = 'Main_{0}_{1}_{2}_{3}.jpg'.format(d,t,photo_id,box_name_string)
             if not printCSV:
                 print newfname
 
