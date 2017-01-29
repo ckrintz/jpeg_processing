@@ -3,8 +3,6 @@
 import random,argparse,json,os,sys,time,exifread
 from datetime import datetime, timedelta
 from contextlib import contextmanager
-from shutil import copyfile
-import exifread
 import cv2
 
 DEBUG = False
@@ -74,11 +72,14 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
 		if not yr == '2015' and not yr == '2016':
                     continue
 		else: #2015 or #2016 
+                    #if yr == '2016': #skip 2016s for now - cjk counting test
+                        #continue
 		    if yr == '2015' and mo.startswith('1'):
 		        ##starts with a 1
 		        if mo == '10':
                             continue #we only want 11 and 12
                 #print 'FOUND ONE year is 15 or 16: {0} month is 11 or 12: {1}'.format(yr,mo)
+                #print '\t{0}'.format(newfname)
 
 		if os.path.exists(newfname):
                     print '{0} exists! not overwriting'

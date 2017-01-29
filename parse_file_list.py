@@ -2,17 +2,20 @@
    required: python2.7
    USAGE: python parse_file_list.py filelist.txt 
           python parse_file_list.py --printcsv random_file_listORIG.txt > random_file_map.csv
+          python parse_file_list.py --copy random_file_listORIG.txt > filelist.txt
    The first usage generates a list of new file names with date_time_ID_dir_fnameprefix
 	ID is the camera ID
 	dir is the Box directory under animal_classifciation 
 	and fnameprefix is the filename (without .JPG) in box under dir.
    The second usage generates a csv file with lines: orig_filename, dir, fnameprefix
 	dir and fnameprefix are the same as above
+   The third usage is the same as the first only it copies the file via rsync to a remote hardcoded location
 
 '''
 
 import argparse,json,os,sys,time,exifread
 from contextlib import contextmanager #for timeblock
+import cv2
 
 DEBUG = False
 
@@ -24,10 +27,16 @@ def main():
     parser.add_argument('fname',action='store',help='filename')
     #optional args
     parser.add_argument('--printcsv',action='store_true',default=False,help='Generate a CSV file of the map')
+    parser.add_argument('--copy',action='store_true',default=False,help='copy to remote directory via rsync (hardcoded)')
     args = parser.parse_args()
 
     fname=args.fname
     printCSV=args.printcsv
+    copyThem=args.copy
+    rootstr = 'root@169.231.235.115:/opt2/sedgwick/images/'
+    count = 0
+    size = 0
+
     boxdirID = 0 #0:20
     boxfileID = 0 #0:500
     done18 = False
@@ -89,6 +98,32 @@ def main():
             newfname = 'Main_{0}_{1}_{2}_{3}.JPG'.format(d,t,photo_id,box_name_string)
             if not printCSV:
                 print newfname
-        
+
+	    if copyThem:
+                size += os.path.getsize(fname_jpeg)
+                count += 1
+                fn = fname_jpeg.replace(' ','\ ')
+                fn = fn.replace('(','\(')
+                fn = fn.replace(')','\)')
+                #cmd = 'rsync -az {0} {1}/{2}/{3}/{4}'.format(fn,rootstr,yr,mo,newfname)
+                cmd = 'rsync -az {0} {1}/zooniverse/{2}'.format(fn,rootstr,newfname)
+                os.system(cmd)
+
+                #make thumbnail 300 pixels wide
+                image = cv2.imread(fname_jpeg)
+                r = 300.0/image.shape[1] #shape: rows,cols,channels, so width is index 1
+                dim = (300, int(image.shape[0] *r)) #height is index 0
+                resized = cv2.resize(image,dim,interpolation=cv2.INTER_AREA)
+                fnsmall = 'tmp112.jpg'
+                cv2.imwrite(fnsmall,resized)
+                nfn = newfname.replace('.jpg','_t.jpg')
+                #cmd = 'rsync -az {0} {1}/{2}/{3}/{4}'.format(fnsmall,rootstr,yr,mo,nfn)
+                cmd = 'rsync -az {0} {1}/zooniverse/{2}'.format(fnsmall,rootstr,nfn)
+                os.system(cmd)
+                if DEBUG:
+                    print 'command: {0} {1} {2}'.format(cmd,fn,newfname)
+                    print 'command: {0} {1}'.format(fnsmall,nfn)
+    print 'copied {0} files and {1} bytes'.format(count, size)
+
 if __name__ == "__main__":
         main()
