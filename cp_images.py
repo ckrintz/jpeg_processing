@@ -22,30 +22,36 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
     size = 0
     count = 0
     tries = 0
-    #rootstr = 'root@169.231.235.52:/opt/sedgwick/images/'
     ''' opt	2013, 2014, 2015 1-10		2014:7,8; 2015:7
         opt2	2015 11,12; 2016		2015: 11,12; 2016 2,11,1
-        opt3	2017 all, zooniverse 10k		2017 all
+        opt3	2017 all, zooniverse 10k	2017 all
     '''
-    rootstr = 'root@169.231.235.52:/opt2/sedgwick/images/'
+    rootstr = 'root@169.231.235.52:/opt/sedgwick/images/'  #2013; 2014; 2015 1-10
+    #rootstr = 'root@169.231.235.52:/opt3/sedgwick/images/' #2017 all
+    #rootstr = 'root@169.231.235.52:/opt2/sedgwick/images/' #2015 11,12; 2016 all
     for root, subFolders, files in os.walk(srcdir):
         for ele in files:
             fname = os.path.join(root, ele) #full path name
             if ele.endswith(".JPG") and (preflong in fname):
 		tries += 1
+                photo_id = -1
 		if tries % 100 == 0:
 		    print 'examined {0} images...'.format(tries)
                 if ele.startswith('IMAG'):
                     idx = 4
                 elif ele.startswith('IMG_'):
-                    idx = 3
+                    if ele.endswith('(1).JPG'): #Blue schist: IMG_1342 (1).JPG
+                        photo_id = ele[4:len(ele)-8]
+		    else:
+                        idx = 3
                 elif ele.startswith('RCNX'):
                     idx = 3
                 elif ele.startswith('MFDC'):
                     idx = 3
 		else:
 		    idx = ele.rindex(' ') #xxx 500.JPG
-                photo_id = ele[idx+1:len(ele)-4]
+                if photo_id == -1:
+                    photo_id = ele[idx+1:len(ele)-4]
                 with open(fname, 'rb') as fjpeg:
                     tags = exifread.process_file(fjpeg)
                 stop_tag = 'Image DateTime'
@@ -54,67 +60,58 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
                 d = (dt_tag.split()[0]).replace(':','-')
                 t = dt_tag.split()[1]
                 newfname = '{0}_{1}_{2}_{3}.jpg'.format(prefix,d,t,photo_id)
+                newFullFname = os.path.join(destdir, newfname) #full path name
 
 		#directory name YYYY/MM
                 yr = datetime.strptime(dt_tag.split()[0], "%Y:%m:%d").strftime('%Y')
                 mo = datetime.strptime(dt_tag.split()[0], "%Y:%m:%d").strftime('%m')
-		#2013 and 2014 goes to /opt
-		#if not yr == '2013' and not yr == '2014':
-                    #continue
-		#2015 01-10 goest to /opt
-		#if not yr == '2015':
-                    #continue
-		#else: 
-                    ##print 'year is 15: {0} month is: {1}'.format(yr,mo)
-		    #if not mo.startswith('0'):
-		        ##starts with a 1
-		        #if not mo == '10':
-                            #continue
-                #print 'FOUND ONE year is 15: {0} month is: {1}'.format(yr,mo)
 
-		#2015 11,12 and 2016 goest to /opt2
-		if not yr == '2015' and not yr == '2016':
-                    continue
-		else: #2015 or #2016 
-                    #if yr == '2016': #skip 2016s for now - cjk counting test
-                        #continue
-		    if yr == '2015' and mo.startswith('1'):
-		        ##starts with a 1
-		        if mo == '10':
-                            continue #we only want 11 and 12
-                #print 'FOUND ONE year is 15 or 16: {0} month is 11 or 12: {1}'.format(yr,mo)
-                #print '\t{0}'.format(newfname)
+ 		##2014:7,8; 2015:7
+		#if mo == '07' or mo == '08':
+                    #if yr == '2014' or (yr == '2015' and mo == '08'):
+		        #if local and os.path.exists(newfname):
+                            #print '{0} exists! not overwriting'
+		            #continue
+                        #size += os.path.getsize(fname)
+		        #count += 1
+                        #copyIt(newfname,newFullFname,fname,yr,mo,rootstr)
 
-		if os.path.exists(newfname):
-                    print '{0} exists! not overwriting'
-		    continue
-                size += os.path.getsize(fname)
-		count += 1
-		if local:
-                    copyfile(fname, newfname) #works locally
-		else: 
-		    fn = fname.replace(' ','\ ')
-		    fn = fn.replace('(','\(')
-		    fn = fn.replace(')','\)')
-		    cmd = 'rsync -az {0} {1}/{2}/{3}/{4}'.format(fn,rootstr,yr,mo,newfname)
-		    os.system(cmd)
-
-		    #make thumbnail 300 pixels wide
-		    image = cv2.imread(fname)
-		    r = 300.0/image.shape[1] #shape: rows,cols,channels, so width is index 1
-		    dim = (300, int(image.shape[0] *r)) #height is index 0
-		    resized = cv2.resize(image,dim,interpolation=cv2.INTER_AREA)
-		    fnsmall = 'tmp111.jpg'
-		    cv2.imwrite(fnsmall,resized)
-		    nfn = newfname.replace('.jpg','_t.jpg')
-		    cmd = 'rsync -az {0} {1}/{2}/{3}/{4}'.format(fnsmall,rootstr,yr,mo,nfn)
-		    os.system(cmd)
-		    if DEBUG:
-			print 'command: {0} {1} {2}'.format(cmd,fn,newfname)
-			print 'command: {0} {1}'.format(fnsmall,nfn)
+ 		#2015:7
+		if (mo == '07' and yr == '2015'):
+		    if local and os.path.exists(newfname):
+                        print '{0} exists! not overwriting'
+		        continue
+                    size += os.path.getsize(fname)
+		    count += 1
+                    copyIt(newfname,newFullFname,fname,yr,mo,rootstr)
 
     return size,count
 
+
+######################## copyIt ############################
+def copyIt(newfname,newFullFname,fname,yr,mo,rootstr):
+    if local:
+        shutil.copy2(fname, newFullFname)
+    else: 
+	fn = fname.replace(' ','\ ')
+	fn = fn.replace('(','\(')
+	fn = fn.replace(')','\)')
+	cmd = 'rsync -az {0} {1}/{2}/{3}/{4}'.format(fn,rootstr,yr,mo,newfname)
+	os.system(cmd)
+
+	#make thumbnail 300 pixels wide
+	image = cv2.imread(fname)
+	r = 300.0/image.shape[1] #shape: rows,cols,channels, so width is index 1
+	dim = (300, int(image.shape[0] *r)) #height is index 0
+	resized = cv2.resize(image,dim,interpolation=cv2.INTER_AREA)
+	fnsmall = 'tmp111.jpg'
+	cv2.imwrite(fnsmall,resized)
+	nfn = newfname.replace('.jpg','_t.jpg')
+	cmd = 'rsync -az {0} {1}/{2}/{3}/{4}'.format(fnsmall,rootstr,yr,mo,nfn)
+	os.system(cmd)
+	if DEBUG:
+	    print 'command: {0} {1} {2}'.format(cmd,fn,newfname)
+	    print 'command: {0} {1}'.format(fnsmall,nfn)
 
 ######################## main ############################
 def main():

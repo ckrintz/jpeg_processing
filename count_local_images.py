@@ -7,7 +7,7 @@ from contextlib import contextmanager
 import OpenSSL
 import urllib3
 urllib3.disable_warnings()
-import upload_files, jpeg_processor, ocr
+#import upload_files, jpeg_processor, ocr
 
 DEBUG = False
 sum_sz = {}
@@ -41,6 +41,12 @@ def process_local_dir(fn,prefix,preflong,pictype):
                 #dt_tag: 2014:08:01 19:06:50
                 dt = datetime.strptime(dt_tag.split()[0], "%Y:%m:%d")
                 pref = '{0}{1}'.format(dt.year,dt.month)
+		if pref == '20157':
+                    d = (dt_tag.split()[0]).replace(':','-')
+                    t = dt_tag.split()[1]
+                    newfname = '{0}_{1}_{2}_XXXX.jpg'.format(prefix,d,t)
+		    print '{0},{1}'.format(fname,newfname)
+		
 		if pref in sum_sz:
                     sum_sz[pref] += sz
                     sum_cnt[pref] += 1
@@ -92,10 +98,16 @@ def main():
 
         #next, process the directory passed in to upload what doesn't match
         sz,cnt = process_local_dir(args.imgdir,prefix,full_prefix,pictype)
-        print '{0}: size_in_KB: {1} count: {2} avgsize_in_KB: {3}'.format(prefix,sz/1024,cnt,(sz/cnt)/1024)
+        if cnt != 0:
+            print '{0}: size_in_KB: {1} count: {2} avgsize_in_KB: {3}'.format(prefix,sz/1024,cnt,(sz/cnt)/1024)
+	else:
+            print '{0}: size_in_KB: {1} count: {2} avgsize_in_KB: {3}'.format(prefix,sz/1024,cnt,0)
         szsum += sz
         cntsum += cnt
-    print 'TOTAL: size_in_KB: {0} count: {1} avgsize_in_KB: {2}'.format(szsum/1024,cntsum,(szsum/cntsum)/1024)
+    if cntsum != 0:
+        print 'TOTAL: size_in_KB: {0} count: {1} avgsize_in_KB: {2}'.format(szsum/1024,cntsum,(szsum/cntsum)/1024)
+    else:
+        print 'TOTAL: size_in_KB: {0} count: {1} avgsize_in_KB: {2}'.format(szsum/1024,cntsum,0)
     for key in sum_sz:
         print '{0}: sz={1} count={2}'.format(key,sum_sz[key],sum_cnt[key])
 

@@ -33,7 +33,7 @@ def main():
     fname=args.fname
     printCSV=args.printcsv
     copyThem=args.copy
-    rootstr = 'root@169.231.235.52:/opt2/sedgwick/images/'
+    rootstr = 'root@169.231.235.52:/opt3/sedgwick/images/'
     count = 0
     size = 0
 
