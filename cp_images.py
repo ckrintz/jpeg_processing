@@ -26,9 +26,9 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
         opt2	2015 11,12; 2016		2015: 11,12; 2016 2,11,1
         opt3	2017 all, zooniverse 10k	2017 all
     '''
-    rootstr = 'root@169.231.235.52:/opt/sedgwick/images/'  #2013; 2014; 2015 1-10
-    #rootstr = 'root@169.231.235.52:/opt3/sedgwick/images/' #2017 all
+    #rootstr = 'root@169.231.235.52:/opt/sedgwick/images/'  #2013; 2014; 2015 1-10
     #rootstr = 'root@169.231.235.52:/opt2/sedgwick/images/' #2015 11,12; 2016 all
+    rootstr = 'root@169.231.235.52:/opt3/sedgwick/images/' #2017 all
     for root, subFolders, files in os.walk(srcdir):
         for ele in files:
             fname = os.path.join(root, ele) #full path name
@@ -76,8 +76,8 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
 		        #count += 1
                         #copyIt(newfname,newFullFname,fname,yr,mo,rootstr)
 
- 		#2015:7
-		if (mo == '07' and yr == '2015'):
+ 		#2016
+		if yr == '2017':
 		    if local and os.path.exists(newfname):
                         print '{0} exists! not overwriting'
 		        continue
