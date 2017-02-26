@@ -28,6 +28,7 @@ def process_local_dir(srcdir,destdir,prefix,preflong,pictype):
     '''
     #rootstr = 'root@169.231.235.52:/opt/sedgwick/images/'  #2013; 2014; 2015 1-10
     #rootstr = 'root@169.231.235.52:/opt2/sedgwick/images/' #2015 11,12; 2016 all
+    #rootstr = 'root@169.231.235.52:/opt3/sedgwick/images/Main_timelapse/' #November 2016
     rootstr = 'root@169.231.235.52:/opt3/sedgwick/images/' #2017 all
     for root, subFolders, files in os.walk(srcdir):
         for ele in files:
